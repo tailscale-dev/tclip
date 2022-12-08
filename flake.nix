@@ -34,10 +34,20 @@
             modules = ./gomod2nix.toml;
           };
 
+          tailpaste = pkgs.runCommand "tailpaste" {} ''
+            mkdir -p $out/bin
+            ln -s ${bin}/bin/tailpaste $out/bin/tailpaste
+          '';
+          
+          web = pkgs.runCommand "web" {} ''
+            mkdir -p $out/bin
+            ln -s ${bin}/bin/web $out/bin/web
+          '';
+
           docker = pkgs.dockerTools.buildLayeredImage {
             name = "tailpaste";
             tag = "latest";
-            config.Cmd = [ "${bin}/bin/web" ];
+            config.Cmd = [ "${web}/bin/web" ];
             contents = [ pkgs.cacert bin ];
 
             copyToRoot = pkgs.buildEnv {
