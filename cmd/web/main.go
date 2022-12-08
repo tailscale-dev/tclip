@@ -141,7 +141,15 @@ WHERE p.id = ?1`
 			return
 		}
 
-		err = r.ParseMultipartForm(formDataLimit)
+		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data;") {
+			err = r.ParseMultipartForm(formDataLimit)
+		} else if r.Header.Get("Content-Type") == "application/x-www-form-urlencoded" {
+			err = r.ParseForm()
+		} else {
+			log.Printf("%s: unknown content type: %s", r.RemoteAddr, r.Header.Get("Content-Type"))
+			http.Error(w, "bad content-type, should be a form", http.StatusBadRequest)
+			return
+		}
 		if err != nil {
 			log.Printf("%s: bad form: %v", r.RemoteAddr, err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -186,7 +194,10 @@ VALUES
 			return
 		}
 
-		http.Redirect(w, r, "/paste/"+id, http.StatusTemporaryRedirect)
+		log.Printf("new paste: %s", id)
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "http://%s/paste/%s", r.Host, id)
 	})
 
 	log.Printf("listening on http://%s", *hostname)
