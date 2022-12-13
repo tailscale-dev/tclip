@@ -1,0 +1,26 @@
+{{define "header"}}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{.Title}}</title>
+        <link rel="stylesheet" href="/static/css/xess.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    </head>
+    <body id="top">
+        <main>
+            <nav>
+                <a href="/">Paste</a>
+                {{if .UserInfo}}<div class="right">{{.UserInfo.DisplayName}} <img style="width:32px;height:32px" src="{{.UserInfo.ProfilePicURL}}" /></div>{{end}}
+            </nav>
+
+            <h1>{{.Title}}</h1>
+{{end}}
+
+{{define "footer"}}
+            <footer>
+                <p>Made with love by Tailscale.</p>
+            </footer>
+        </main>
+    </body>
+</html>
+{{end}}

@@ -5,7 +5,7 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"database/sql/driver"
-	_ "embed"
+	"embed"
 	"flag"
 	"fmt"
 	"log"
@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/google/uuid"
 	"github.com/tailscale/sqlite"
@@ -28,6 +29,12 @@ var (
 
 	//go:embed schema.sql
 	sqlSchema string
+
+	//go:embed static
+	staticFiles embed.FS
+
+	//go:embed tmpl/*.tmpl
+	templateFiles embed.FS
 )
 
 const formDataLimit = 64 * 1024 // 64 kilobytes (approx. 32 printed pages of text)
@@ -45,6 +52,194 @@ func envOr(key, defaultVal string) string {
 		return result
 	}
 	return defaultVal
+}
+
+type Server struct {
+	lc    *tailscale.LocalClient
+	db    *sql.DB
+	tmpls *template.Template
+}
+
+func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		s.NotFound(w, r)
+		return
+	}
+
+	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	if err != nil {
+		log.Printf("%s: error fetching user info: %v", r.RemoteAddr, err)
+		http.Error(w, "can't fetch user info", http.StatusBadRequest)
+		return
+	}
+
+	err = s.tmpls.ExecuteTemplate(w, "create.tmpl", struct {
+		UserInfo *tailcfg.UserProfile
+		Title    string
+	}{
+		UserInfo: ui.UserProfile,
+		Title:    "Create new paste",
+	})
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+	}
+}
+
+func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
+	ui, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	var up *tailcfg.UserProfile
+	if ui != nil {
+		up = ui.UserProfile
+	}
+
+	s.tmpls.ExecuteTemplate(w, "notfound.tmpl", struct {
+		UserInfo *tailcfg.UserProfile
+		Title    string
+	}{
+		UserInfo: up,
+		Title:    "Not found",
+	})
+}
+
+func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
+	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data;") {
+		err = r.ParseMultipartForm(formDataLimit)
+	} else if r.Header.Get("Content-Type") == "application/x-www-form-urlencoded" {
+		err = r.ParseForm()
+	} else {
+		log.Printf("%s: unknown content type: %s", r.RemoteAddr, r.Header.Get("Content-Type"))
+		http.Error(w, "bad content-type, should be a form", http.StatusBadRequest)
+		return
+	}
+	if err != nil {
+		log.Printf("%s: bad form: %v", r.RemoteAddr, err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if !r.Form.Has("filename") && !r.Form.Has("data") {
+		log.Printf("%s: posted form without filename and data", r.RemoteAddr)
+		http.Error(w, "include form values filename and data", http.StatusBadRequest)
+		return
+	}
+
+	fname := r.Form.Get("filename")
+	data := r.Form.Get("data")
+	id := uuid.NewString()
+
+	q := `
+INSERT INTO pastes
+    ( id
+    , user_id
+    , filename
+    , data
+    )
+VALUES
+    ( ?1
+    , ?2
+    , ?3
+    , ?4
+    )`
+
+	_, err = s.db.ExecContext(
+		r.Context(),
+		q,
+		id,
+		userInfo.UserProfile.ID,
+		fname,
+		data,
+	)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("new paste: %s", id)
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "http://%s/paste/%s", r.Host, id)
+}
+
+func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
+	ui, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	var up *tailcfg.UserProfile
+	if ui != nil {
+		up = ui.UserProfile
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "must GET", http.StatusMethodNotAllowed)
+		return
+	}
+
+	sp := strings.Split(r.URL.Path, "/")
+	sp = sp[2:]
+
+	if len(sp) == 0 {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	id := sp[0]
+
+	q := `
+SELECT p.filename
+     , p.data
+     , u.id
+     , u.login_name
+     , u.display_name
+     , u.profile_pic_url
+FROM pastes p
+INNER JOIN users u
+  ON p.user_id = u.id
+WHERE p.id = ?1`
+
+	row := s.db.QueryRowContext(r.Context(), q, id)
+	var fname, data, userID, userLoginName, userDisplayName, userProfilePicURL string
+
+	err := row.Scan(&fname, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
+	if err != nil {
+		log.Printf("%s: looking up %s: %v", r.RemoteAddr, id, err)
+		http.Error(w, fmt.Sprintf("can't find paste %s: %v", id, err), http.StatusInternalServerError)
+		return
+	}
+
+	if len(sp) != 1 && sp[1] == "raw" {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, data)
+		return
+	}
+
+	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
+		UserInfo            *tailcfg.UserProfile
+		Title               string
+		PasterDisplayName   string
+		PasterProfilePicURL string
+		ID                  string
+		Data                string
+	}{
+		UserInfo:            up,
+		Title:               fname,
+		PasterDisplayName:   userDisplayName,
+		PasterProfilePicURL: userProfilePicURL,
+		ID:                  id,
+		Data:                data,
+	})
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+	}
 }
 
 func main() {
@@ -80,128 +275,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mux := http.NewServeMux()
+	tailnetMux := http.NewServeMux()
 
-	mux.HandleFunc("/paste/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "must GET", http.StatusMethodNotAllowed)
-			return
-		}
-		
-		sp := strings.Split(r.URL.Path, "/")
-		sp = sp[2:]
+	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.tmpl"))
 
-		if len(sp) == 0 {
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-			return
-		}
+	srv := &Server{lc, db, tmpls}
 
-		id := sp[0]
-
-		q := `
-SELECT p.filename
-     , p.data
-     , u.id
-     , u.login_name
-     , u.display_name
-     , u.profile_pic_url
-FROM pastes p
-INNER JOIN users u
-  ON p.user_id = u.id
-WHERE p.id = ?1`
-
-		row := db.QueryRowContext(r.Context(), q, id)
-		var fname, data, userID, userLoginName, userDisplayName, userProfilePicURL string
-
-		err := row.Scan(&fname, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
-		if err != nil {
-			log.Printf("%s: looking up %s: %v", r.RemoteAddr, id, err)
-			http.Error(w, fmt.Sprintf("can't find paste %s: %v", id, err), http.StatusInternalServerError)
-			return
-		}
-
-		if len(sp) != 1 && sp[1] == "raw" {
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
-			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
-
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, data)
-			return
-		}
-
-		http.Error(w, "not implemented yet", http.StatusNotImplemented)
-	})
-
-	mux.HandleFunc("/api/post", func(w http.ResponseWriter, r *http.Request) {
-		userInfo, err := upsertUserInfo(r.Context(), db, lc, r.RemoteAddr)
-		if err != nil {
-			log.Printf("%s: %v", r.RemoteAddr, err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data;") {
-			err = r.ParseMultipartForm(formDataLimit)
-		} else if r.Header.Get("Content-Type") == "application/x-www-form-urlencoded" {
-			err = r.ParseForm()
-		} else {
-			log.Printf("%s: unknown content type: %s", r.RemoteAddr, r.Header.Get("Content-Type"))
-			http.Error(w, "bad content-type, should be a form", http.StatusBadRequest)
-			return
-		}
-		if err != nil {
-			log.Printf("%s: bad form: %v", r.RemoteAddr, err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if !r.Form.Has("filename") && !r.Form.Has("data") {
-			log.Printf("%s: posted form without filename and data", r.RemoteAddr)
-			http.Error(w, "include form values filename and data", http.StatusBadRequest)
-			return
-		}
-
-		fname := r.Form.Get("filename")
-		data := r.Form.Get("data")
-		id := uuid.NewString()
-
-		q := `
-INSERT INTO pastes
-    ( id
-    , user_id
-    , filename
-    , data
-    )
-VALUES
-    ( ?1
-    , ?2
-    , ?3
-    , ?4
-    )`
-
-		_, err = db.ExecContext(
-			r.Context(),
-			q,
-			id,
-			userInfo.UserProfile.ID,
-			fname,
-			data,
-		)
-		if err != nil {
-			log.Printf("%s: %v", r.RemoteAddr, err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("new paste: %s", id)
-
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "http://%s/paste/%s", r.Host, id)
-	})
+	tailnetMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
+	tailnetMux.HandleFunc("/paste/", srv.ShowPost)
+	tailnetMux.HandleFunc("/api/post", srv.TailnetSubmitPaste)
+	tailnetMux.HandleFunc("/", srv.TailnetIndex)
 
 	log.Printf("listening on http://%s", *hostname)
-	log.Fatal(http.Serve(ln, mux))
+	log.Fatal(http.Serve(ln, tailnetMux))
 }
 
 func openDB(dir string) (*sql.DB, error) {

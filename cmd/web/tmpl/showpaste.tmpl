@@ -1,0 +1,9 @@
+{{template "header" .}}
+
+<div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+<pre><code>
+{{.Data}}
+</code></pre>
+
+<a href="/paste/{{.ID}}">Permalink</a> - <a href="/paste/{{.ID}}/dl">Download</a>
+{{template "footer" .}}

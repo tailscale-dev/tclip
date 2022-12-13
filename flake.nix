@@ -27,34 +27,27 @@
         version = builtins.substring 0 8 self.lastModifiedDate;
       in {
         packages = rec {
-          bin = pkgs.buildGoApplication {
-            pname = "tailpaste";
+          web = pkgs.buildGoApplication {
+            pname = "tailpaste-web";
             version = "0.1.0-dev";
             src = ./.;
+            subPackages = "cmd/web";
             modules = ./gomod2nix.toml;
           };
 
-          tailpaste = pkgs.runCommand "tailpaste" {} ''
-            mkdir -p $out/bin
-            ln -s ${bin}/bin/tailpaste $out/bin/tailpaste
-          '';
-          
-          web = pkgs.runCommand "web" {} ''
-            mkdir -p $out/bin
-            ln -s ${bin}/bin/web $out/bin/web
-          '';
+          tailpaste = pkgs.buildGoApplication {
+            pname = "tailpaste";
+            inherit (web) src version modules;
+            subPackages = "cmd/tailpaste";
+
+            CGO_ENABLED = "0";
+          };
 
           docker = pkgs.dockerTools.buildLayeredImage {
             name = "tailpaste";
             tag = "latest";
             config.Cmd = [ "${web}/bin/web" ];
-            contents = [ pkgs.cacert bin ];
-
-            copyToRoot = pkgs.buildEnv {
-              name = "image-root";
-              paths = [ pkgs.cacert bin ];
-              pathsToLink = [ "/bin" ];
-            };
+            contents = [ pkgs.cacert ];
           };
 
           default = docker;
