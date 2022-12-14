@@ -124,14 +124,15 @@ func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !r.Form.Has("filename") && !r.Form.Has("data") {
+	if !r.Form.Has("filename") && !r.Form.Has("content") {
+		log.Printf("%s", r.Form.Encode())
 		log.Printf("%s: posted form without filename and data", r.RemoteAddr)
 		http.Error(w, "include form values filename and data", http.StatusBadRequest)
 		return
 	}
 
 	fname := r.Form.Get("filename")
-	data := r.Form.Get("data")
+	data := r.Form.Get("content")
 	id := uuid.NewString()
 
 	q := `
@@ -164,8 +165,14 @@ VALUES
 
 	log.Printf("new paste: %s", id)
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "http://%s/paste/%s", r.Host, id)
+	switch r.Header.Get("Accept") {
+	case "text/plain":
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "http://%s/paste/%s", r.Host, id)
+	default:
+		http.Redirect(w, r, fmt.Sprintf("http://%s/%s", r.Host, id), http.StatusTemporaryRedirect)
+	}
+
 }
 
 func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {

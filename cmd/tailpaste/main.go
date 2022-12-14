@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -58,9 +59,17 @@ func main() {
 	q := url.Values{}
 
 	q.Set("filename", filepath.Base(*fname))
-	q.Set("data", string(data))
+	q.Set("content", string(data))
 
-	resp, err := http.PostForm(u.String(), q)
+	req, err := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(q.Encode))
+	if err != nil {
+		log.Fatalf("can't make HTTP request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Accept", "text/plain")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatalf("can't post to %s: %v", u, err)
 	}
