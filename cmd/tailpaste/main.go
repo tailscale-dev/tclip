@@ -61,7 +61,7 @@ func main() {
 	q.Set("filename", filepath.Base(*fname))
 	q.Set("content", string(data))
 
-	req, err := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(q.Encode))
+	req, err := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(q.Encode()))
 	if err != nil {
 		log.Fatalf("can't make HTTP request: %v", err)
 	}

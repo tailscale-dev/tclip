@@ -4,6 +4,7 @@ PRAGMA journal_mode=WAL;
 -- Paste data
 CREATE TABLE IF NOT EXISTS pastes
   ( id TEXT PRIMARY KEY NOT NULL
+  , created_at TEXT NOT NULL -- RFC 3339 timestamp
   , user_id TEXT NOT NULL
   , filename TEXT NOT NULL
   , data TEXT NOT NULL

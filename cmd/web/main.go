@@ -12,8 +12,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/tailscale/sqlite"
@@ -68,8 +70,7 @@ func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
 
 	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
-		log.Printf("%s: error fetching user info: %v", r.RemoteAddr, err)
-		http.Error(w, "can't fetch user info", http.StatusBadRequest)
+			s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -147,6 +148,7 @@ func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
 	q := `
 INSERT INTO pastes
     ( id
+    , created_at
     , user_id
     , filename
     , data
@@ -156,19 +158,20 @@ VALUES
     , ?2
     , ?3
     , ?4
+    , ?5
     )`
 
 	_, err = s.db.ExecContext(
 		r.Context(),
 		q,
 		id,
+		time.Now(),
 		userInfo.UserProfile.ID,
 		fname,
 		data,
 	)
 	if err != nil {
-		log.Printf("%s: %v", r.RemoteAddr, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+			s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -182,6 +185,126 @@ VALUES
 		http.Redirect(w, r, fmt.Sprintf("http://%s/%s", r.Host, id), http.StatusTemporaryRedirect)
 	}
 
+}
+
+func (s *Server) TailnetPasteIndex(w http.ResponseWriter, r *http.Request) {
+	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	if err != nil {
+			s.ShowError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	_ = userInfo
+
+	type JoinedPasteInfo struct {
+		ID                string `json:"id"`
+		Filename          string `json:"fname"`
+		CreatedAt         string `json:"created_at"`
+		PasterDisplayName string `json:"created_by"`
+	}
+
+	q := `
+SELECT p.id
+     , p.filename
+     , p.created_at
+     , u.display_name
+FROM pastes p
+INNER JOIN users u
+  ON p.user_id = u.id
+LIMIT 25
+OFFSET ?1
+`
+
+	uq := r.URL.Query()
+	page := uq.Get("page")
+	if page == "" {
+		page = "0"
+	}
+
+	pageNum, err := strconv.Atoi(page)
+	if err != nil {
+		log.Printf("%s: invalid ?page: %s: %v", r.RemoteAddr, page, err)
+		pageNum = 0
+	}
+
+	rows, err := s.db.Query(q, clampToZero(pageNum))
+	if err != nil {
+			s.ShowError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	jpis := make([]JoinedPasteInfo, 0, 25)
+
+	defer rows.Close()
+	for rows.Next() {
+		jpi := JoinedPasteInfo{}
+
+		err := rows.Scan(&jpi.ID, &jpi.Filename, &jpi.CreatedAt, &jpi.PasterDisplayName)
+		if err != nil {
+			s.ShowError(w, r, err, http.StatusInternalServerError)
+			return
+		}
+
+		jpis = append(jpis, jpi)
+	}
+
+	if len(jpis) == 0 {
+
+	}
+
+	var prev, next *int
+
+	if pageNum != 0 {
+		i := pageNum - 1
+		prev = &i
+	}
+	if len(jpis) == 25 {
+		i := pageNum + 1
+		next = &i
+	}
+
+	err = s.tmpls.ExecuteTemplate(w, "listpaste.tmpl", struct {
+		UserInfo *tailcfg.UserProfile
+		Title    string
+		Pastes   []JoinedPasteInfo
+		Prev     *int
+		Next     *int
+		Page     int
+	}{
+		UserInfo: userInfo.UserProfile,
+		Title:    "Pastes",
+		Pastes:   jpis,
+		Prev:     prev,
+		Next:     next,
+		Page:     pageNum,
+	})
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+	}
+}
+
+func (s *Server) ShowError(w http.ResponseWriter, r *http.Request, err error, code int) {
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(code)
+
+	log.Printf("%s: %v", r.RemoteAddr, err)
+
+	if err := s.tmpls.ExecuteTemplate(w, "error.tmpl", struct {
+		Title, Error string
+		UserInfo     any
+	}{
+		Title: "Oh noes!",
+		Error: err.Error(),
+	}); err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+	}
+}
+
+func clampToZero(i int) int {
+	if i <= 0 {
+		return 0
+	}
+	return i
 }
 
 func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
@@ -208,6 +331,7 @@ func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
 
 	q := `
 SELECT p.filename
+     , p.created_at
      , p.data
      , u.id
      , u.login_name
@@ -220,11 +344,11 @@ WHERE p.id = ?1`
 
 	row := s.db.QueryRowContext(r.Context(), q, id)
 	var fname, data, userID, userLoginName, userDisplayName, userProfilePicURL string
+	var createdAt string
 
-	err := row.Scan(&fname, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
+	err := row.Scan(&fname, &createdAt, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
 	if err != nil {
-		log.Printf("%s: looking up %s: %v", r.RemoteAddr, id, err)
-		http.Error(w, fmt.Sprintf("can't find paste %s: %v", id, err), http.StatusInternalServerError)
+		s.ShowError(w, r, fmt.Errorf("can't find paste %s: %w", id, err), http.StatusInternalServerError)
 		return
 	}
 
@@ -252,6 +376,7 @@ WHERE p.id = ?1`
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
 		UserInfo            *tailcfg.UserProfile
 		Title               string
+		CreatedAt           string
 		PasterDisplayName   string
 		PasterProfilePicURL string
 		ID                  string
@@ -259,6 +384,7 @@ WHERE p.id = ?1`
 	}{
 		UserInfo:            up,
 		Title:               fname,
+		CreatedAt:           createdAt,
 		PasterDisplayName:   userDisplayName,
 		PasterProfilePicURL: userProfilePicURL,
 		ID:                  id,
@@ -309,6 +435,7 @@ func main() {
 	tailnetMux := http.NewServeMux()
 	tailnetMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
 	tailnetMux.HandleFunc("/paste/", srv.ShowPost)
+	tailnetMux.HandleFunc("/paste/list", srv.TailnetPasteIndex)
 	tailnetMux.HandleFunc("/api/post", srv.TailnetSubmitPaste)
 	tailnetMux.HandleFunc("/", srv.TailnetIndex)
 

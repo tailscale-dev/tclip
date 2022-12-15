@@ -1,6 +1,8 @@
 {{template "header" .}}
 
-<div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+<div class="right"><img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+
+<p>Created at {{.CreatedAt}} by {{.PasterDisplayName}}</p>
 
 <pre><code>
 {{.Data}}

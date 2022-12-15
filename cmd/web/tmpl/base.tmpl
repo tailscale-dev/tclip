@@ -9,7 +9,7 @@
     <body id="top">
         <main>
             <nav>
-                <a href="/">Paste</a>
+                <a href="/">Paste</a>{{if .UserInfo}} - <a href="/paste/list">List</a> - <a href="/help">Help</a>{{end}}
                 {{if .UserInfo}}<div class="right">{{.UserInfo.DisplayName}} <img style="width:32px;height:32px" src="{{.UserInfo.ProfilePicURL}}" /></div>{{end}}
             </nav>
 

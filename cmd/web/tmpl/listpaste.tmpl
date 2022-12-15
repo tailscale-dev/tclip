@@ -1,0 +1,11 @@
+{{template "header" .}}
+
+<ul>
+    {{range .Pastes}}
+    <li><a href="/paste/{{.ID}}">{{.Filename}}</a> - {{.CreatedAt}} - {{.PasterDisplayName}}</li>
+    {{end}}
+</ul>
+
+<p>{{if .Prev}}<a href="/paste/list?page={{.Prev}}">Prev</a> - {{end}} Page {{.Page}} {{if .Next}} - <a href="/paste/list?page={{.Next}}">Next</a>{{end}}</p>
+
+{{template "footer" .}}
