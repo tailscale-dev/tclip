@@ -86,17 +86,26 @@ func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
-	ui, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
-	var up *tailcfg.UserProfile
-	if ui != nil {
-		up = ui.UserProfile
-	}
-
 	s.tmpls.ExecuteTemplate(w, "notfound.tmpl", struct {
 		UserInfo *tailcfg.UserProfile
 		Title    string
 	}{
-		UserInfo: up,
+		UserInfo: nil,
+		Title:    "Not found",
+	})
+}
+
+func (s *Server) PublicIndex(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		s.NotFound(w, r)
+		return
+	}
+
+	s.tmpls.ExecuteTemplate(w, "publicindex.tmpl", struct {
+		UserInfo *tailcfg.UserProfile
+		Title    string
+	}{
+		UserInfo: nil,
 		Title:    "Not found",
 	})
 }
@@ -219,14 +228,25 @@ WHERE p.id = ?1`
 		return
 	}
 
-	if len(sp) != 1 && sp[1] == "raw" {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
-		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+	if len(sp) != 1 {
+		switch sp[1] {
+		case "raw":
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
 
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, data)
-		return
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, data)
+			return
+		case "dl":
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
+			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, data)
+		default:
+			s.NotFound(w, r)
+		}
 	}
 
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
@@ -282,16 +302,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tailnetMux := http.NewServeMux()
-
 	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.tmpl"))
 
 	srv := &Server{lc, db, tmpls}
 
+	tailnetMux := http.NewServeMux()
 	tailnetMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
 	tailnetMux.HandleFunc("/paste/", srv.ShowPost)
 	tailnetMux.HandleFunc("/api/post", srv.TailnetSubmitPaste)
 	tailnetMux.HandleFunc("/", srv.TailnetIndex)
+
+	funnelMux := http.NewServeMux()
+	funnelMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
+	funnelMux.HandleFunc("/", srv.PublicIndex)
+	funnelMux.HandleFunc("/paste/", srv.ShowPost)
 
 	log.Printf("listening on http://%s", *hostname)
 	log.Fatal(http.Serve(ln, tailnetMux))
