@@ -89,6 +89,25 @@ func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) TailnetHelp(w http.ResponseWriter, r *http.Request) {
+	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	if err != nil {
+		s.ShowError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	err = s.tmpls.ExecuteTemplate(w, "help.tmpl", struct {
+		UserInfo *tailcfg.UserProfile
+		Title    string
+	}{
+		UserInfo: ui.UserProfile,
+		Title:    "Help",
+	})
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+	}
+}
+
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
 	s.tmpls.ExecuteTemplate(w, "notfound.tmpl", struct {
 		UserInfo *tailcfg.UserProfile
@@ -185,7 +204,7 @@ VALUES
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "https://%s/paste/%s", s.httpsURL, id)
 	default:
-		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusCreated)
 	}
 
 }
@@ -475,6 +494,7 @@ func main() {
 	tailnetMux.HandleFunc("/paste/list", srv.TailnetPasteIndex)
 	tailnetMux.HandleFunc("/api/post", srv.TailnetSubmitPaste)
 	tailnetMux.HandleFunc("/", srv.TailnetIndex)
+	tailnetMux.HandleFunc("/help", srv.TailnetHelp)
 
 	funnelMux := http.NewServeMux()
 	funnelMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))

@@ -2,8 +2,10 @@
   --background-color: 0;
   --text-color: 43;
   --accent-color: 344;
+  --font-family: "OpenDyslexic", sans-serif;
+  --mono-font-family: "OpenDyslexicMono", monospace;
 
-  --width: 80ch;
+  --width: 45rem;
   --padding: 0;
     
   --selection: hsla(var(--accent-color), 80%, 30%, 100%);
@@ -31,7 +33,7 @@
 }
 
 main {
-  font-family: monospace, monospace;
+  font-family: var(--font-family);
   max-width: var(--width);
   padding: var(--padding);
   margin: auto;
@@ -56,6 +58,7 @@ pre {
   background-color: var(--pre-background);
   padding: 1em;
   border: 0;
+  font-family: var(--mono-font-family);
 }
 
 a, a:active, a:visited {

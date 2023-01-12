@@ -1,0 +1,28 @@
+{{template "header" .}}
+
+<p>Never seen this service before? Want to know how to use it? This page will help you learn more about your tailnet's pastebin tool.</p>
+
+<ul>
+    <li><a href="#cli">Command-line tool</a></li>
+    <li><a href="#api">API</a></li>
+</ul>
+
+<h2 id="cli">Command-line tool</h2>
+
+<p>You can pipe commands or paste files to the pastebin using the command <code>tailpaste</code>. You can install it by installing the <a href="https://go.dev">Go</a> compiler toolkit and then running this command:</p>
+
+<pre><code>go get github.com/tailscale/paste/cmd/tailpaste@main</code></pre>
+
+<p>Once it is installed, invoke it with the command <code>tailpaste</code>:</p>
+
+<pre><code>tailpaste ./foo.txt</code></pre>
+
+<p>and the program will print a URL that you can share with your team. You can also pipe the output from any command to it:</p>
+
+<pre><code>go test | tailpaste -n go-test.txt</code></pre>
+
+<h2 id="api">API</h2>
+
+<p>The pastebin service has an API call that 
+
+{{template "footer" .}}
