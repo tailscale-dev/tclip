@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/md5"
+	"crypto/tls"
 	"database/sql"
 	"database/sql/driver"
 	"embed"
@@ -26,8 +27,9 @@ import (
 )
 
 var (
-	hostname = flag.String("hostname", envOr("TSNET_HOSTNAME", "paste"), "hostname to use on your tailnet, TSNET_HOSTNAME in the environment")
-	dataDir  = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
+	hostname        = flag.String("hostname", envOr("TSNET_HOSTNAME", "paste"), "hostname to use on your tailnet, TSNET_HOSTNAME in the environment")
+	dataDir         = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
+	tsnetLogVerbose = flag.Bool("tsnet-verbose", false, "if set, have tsnet log verbosely to standard error")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -57,9 +59,10 @@ func envOr(key, defaultVal string) string {
 }
 
 type Server struct {
-	lc    *tailscale.LocalClient
-	db    *sql.DB
-	tmpls *template.Template
+	lc       *tailscale.LocalClient // localclient to tsnet server
+	db       *sql.DB                // SQLite datastore
+	tmpls    *template.Template     // HTML templates
+	httpsURL string                 // the tailnet/public base URL of this service
 }
 
 func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +73,7 @@ func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
 
 	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
-			s.ShowError(w, r, err, http.StatusInternalServerError)
+		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -171,7 +174,7 @@ VALUES
 		data,
 	)
 	if err != nil {
-			s.ShowError(w, r, err, http.StatusInternalServerError)
+		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -180,9 +183,9 @@ VALUES
 	switch r.Header.Get("Accept") {
 	case "text/plain":
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "http://%s/paste/%s", r.Host, id)
+		fmt.Fprintf(w, "https://%s/paste/%s", s.httpsURL, id)
 	default:
-		http.Redirect(w, r, fmt.Sprintf("http://%s/%s", r.Host, id), http.StatusTemporaryRedirect)
+		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
 	}
 
 }
@@ -190,7 +193,7 @@ VALUES
 func (s *Server) TailnetPasteIndex(w http.ResponseWriter, r *http.Request) {
 	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
-			s.ShowError(w, r, err, http.StatusInternalServerError)
+		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -211,6 +214,7 @@ SELECT p.id
 FROM pastes p
 INNER JOIN users u
   ON p.user_id = u.id
+ORDER BY p.rowid DESC
 LIMIT 25
 OFFSET ?1
 `
@@ -229,7 +233,7 @@ OFFSET ?1
 
 	rows, err := s.db.Query(q, clampToZero(pageNum))
 	if err != nil {
-			s.ShowError(w, r, err, http.StatusInternalServerError)
+		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -249,7 +253,17 @@ OFFSET ?1
 	}
 
 	if len(jpis) == 0 {
-
+		err = s.tmpls.ExecuteTemplate(w, "nopastes.tmpl", struct {
+			UserInfo *tailcfg.UserProfile
+			Title    string
+		}{
+			UserInfo: userInfo.UserProfile,
+			Title:    "Pastes",
+		})
+		if err != nil {
+			log.Printf("%s: %v", r.RemoteAddr, err)
+		}
+		return
 	}
 
 	var prev, next *int
@@ -276,7 +290,7 @@ OFFSET ?1
 		Pastes:   jpis,
 		Prev:     prev,
 		Next:     next,
-		Page:     pageNum,
+		Page:     pageNum + 1,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
@@ -407,6 +421,10 @@ func main() {
 		Logf:     func(string, ...any) {},
 	}
 
+	if *tsnetLogVerbose {
+		s.Logf = log.Printf
+	}
+
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
 	}
@@ -421,7 +439,26 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = lc
+
+	// wait for tailscale to start before trying to fetch cert names
+	for i := 0; i < 60; i++ {
+		st, err := lc.Status(context.Background())
+		if err != nil {
+			log.Printf("error retrieving tailscale status; retrying: %v", err)
+		} else {
+			if st.BackendState == "Running" {
+				break
+			}
+		}
+		time.Sleep(time.Second)
+	}
+
+	ctx := context.Background()
+	httpsURL, ok := lc.ExpandSNIName(ctx, *hostname)
+	if !ok {
+		log.Printf(httpsURL)
+		log.Fatal("HTTPS is not enabled in the admin panel")
+	}
 
 	ln, err := s.Listen("tcp", ":80")
 	if err != nil {
@@ -430,7 +467,7 @@ func main() {
 
 	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.tmpl"))
 
-	srv := &Server{lc, db, tmpls}
+	srv := &Server{lc, db, tmpls, httpsURL}
 
 	tailnetMux := http.NewServeMux()
 	tailnetMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
@@ -445,7 +482,18 @@ func main() {
 	funnelMux.HandleFunc("/paste/", srv.ShowPost)
 
 	log.Printf("listening on http://%s", *hostname)
-	log.Fatal(http.Serve(ln, tailnetMux))
+	go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
+
+	l443, err := s.Listen("tcp", ":443")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer l443.Close()
+	l443 = tls.NewListener(l443, &tls.Config{
+		GetCertificate: lc.GetCertificate,
+	})
+	log.Printf("listening on https://%s", httpsURL)
+	log.Fatal(http.Serve(l443, tailnetMux))
 }
 
 func openDB(dir string) (*sql.DB, error) {
