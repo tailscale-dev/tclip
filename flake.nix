@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
     utils.url = "github:numtide/flake-utils";
-   
+
     gomod2nix = {
       url = "github:tweag/gomod2nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -28,26 +28,44 @@
       in {
         packages = rec {
           web = pkgs.buildGoApplication {
-            pname = "tailpaste-web";
-            version = "0.1.0-dev";
+            pname = "infinipaste-web";
+            version = "0.1.0-${version}";
             src = ./.;
             subPackages = "cmd/web";
             modules = ./gomod2nix.toml;
           };
 
-          tailpaste = pkgs.buildGoApplication {
-            pname = "tailpaste";
+          infinipaste = pkgs.buildGoApplication {
+            pname = "infinipaste";
             inherit (web) src version modules;
-            subPackages = "cmd/tailpaste";
+            subPackages = "cmd/infinipaste";
 
             CGO_ENABLED = "0";
           };
 
           docker = pkgs.dockerTools.buildLayeredImage {
-            name = "tailpaste";
+            name = "infinipaste";
             tag = "latest";
             config.Cmd = [ "${web}/bin/web" ];
             contents = [ pkgs.cacert ];
+          };
+
+          portable-service = let
+            web-service = pkgs.substituteAll {
+              name = "infinipaste.service";
+              src = ./run/portable-service/infinipaste.service.in;
+              infinipaste = web;
+            };
+          in pkgs.portableService {
+            inherit (web) version;
+            pname = "infinipaste";
+            description = "The infinipaste service";
+            homepage = "https://github.com/tailscale-dev/infinipaste";
+            units = [ web-service ];
+            symlinks = [{
+              object = "${pkgs.cacert}/etc/ssl";
+              symlink = "/etc/ssl";
+            }];
           };
 
           default = docker;
@@ -64,12 +82,9 @@
             go-tools
             gomod2nix.packages.${system}.default
             sqlite-interactive
-
-            jo
-            jq
           ];
 
           TSNET_HOSTNAME = "paste-devel";
         };
-      });
+      }) // {};
 }
