@@ -4,7 +4,11 @@
 
 <ul>
     <li><a href="#cli">Command-line tool</a></li>
-    <li><a href="#api">API</a></li>
+    <li><a href="#api">API</a>
+        <ul>
+            <li><a href="#emacs">Emacs package</a></li>
+        </ul>
+    </li>
 </ul>
 
 <h2 id="cli">Command-line tool</h2>
@@ -19,10 +23,42 @@
 
 <p>and the program will print a URL that you can share with your team. You can also pipe the output from any command to it:</p>
 
-<pre><code>go test | tailpaste -n go-test.txt</code></pre>
+<pre><code>go test &amp;2&lt;1 | tailpaste -n go-test.txt</code></pre>
 
 <h2 id="api">API</h2>
 
-<p>The pastebin service has an API call that 
+<p>The pastebin service has an API call at <code>/api/post</code> that you can use to submit new pastes from command-line tools or your text editor. You use it by constructing either a basic HTML form post or a multipart form with these fields (both are required):</p>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><code>filename</code></td>
+        <td>The name of the file you want to paste.<br />The file extension of the name will determine the syntax highlighting for that paste.</td>
+    </tr>
+    <tr>
+        <td><code>content</code></td>
+        <td>The literal content of the paste.<br />This can be a function, a bit of prose, or an entire buffer of text.</td>
+    </tr>
+</table>
+
+<p>The <code>Accept</code> header will determine what kind of response you get. By default, this service will return a redirect to the paste upon pastes being successfully created. If you do not want this behavior (such as if you are implementing support for your favorite text editor or testing with <code>curl</code>), set the <code>Accept</code> header to the value <code>text/plain</code>. This will make the server return the paste URL as normal text.</p>
+
+<p>Here is an example curl command you can use to paste data to the service:</p>
+
+<pre><code>curl http://paste/api/post -F filename=filename.txt -F content="test paste from curl" -H "Accept: text/plain"</code></pre>
+
+<h3 id="emacs">Emacs package</h3>
+
+<p>The default distribution of tailpaste ships with a package for <a href="https://www.gnu.org/software/emacs/">GNU Emacs</a>. This package will let you submit pastes from your editor. It requires the <a href="https://github.com/tkf/emacs-request"><code>request</code></a> package and exposes two interactive functions:</p>
+
+<ul>
+    <li><code>M-x tailpaste-submit-region</code> - submits the currently highlighted region to tailpaste</li>
+    <li><code>M-x tailpaste-submit-buffer</code> - submits the contents of the current buffer to tailpaste</li>
+</ul>
+
+<p>You can download this package <a href="https://github.com/tailscale/paste/blob/main/contrib/tailpaste.el">from the tailpaste repository</a>. You can install it by using <code>M-x package-install-file</code> or by opening it in Emacs and running <code>M-x package-install-from-buffer</code>. Please be sure that <code>request</code> is installed.</p>
 
 {{template "footer" .}}

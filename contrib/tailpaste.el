@@ -49,24 +49,20 @@
 
 (defun tailpaste--send-paste (fname content)
   "Internal function that actually fires off the paste with name FNAME and content CONTENT to the tailpaste server."
-  (let ((body
-         (url-build-query-string
-                `(("filename" ,fname)
-                  ("content" ,content))))
-         (headers '(("Accept" . "text/plain"))))
-    (request "http://paste/api/post"
-      :type "POST"
-      :data body
-      :headers headers
-      :timeout 60
-      :success (cl-function
-                (lambda (&key response &allow-other-keys)
-                  (message "%s" (request-response-data response)))))))
+  (request (format "%s/api/post" tailpaste-server)
+    :type "POST"
+    :data `(("filename" . ,fname)
+            ("content" . ,content))
+    :headers '(("Accept" . "text/plain"))
+    :timeout 60
+    :success (cl-function
+              (lambda (&key response &allow-other-keys)
+                (message "%s" (request-response-data response))))))
 
 (defun tailpaste-submit-buffer ()
   "Submits the entire current buffer to tailpaste."
   (interactive)
-  (let* ((fname (format "%s.%s"
+  (let ((fname (format "%s.%s"
                         (file-name-base (buffer-file-name))
                         (file-name-extension (buffer-file-name))))
          (content (buffer-string)))
@@ -75,7 +71,7 @@
 (defun tailpaste-submit-region ()
   "Submits the highlighted region to tailpaste."
   (interactive)
-  (let* ((fname (format "%s.%s"
+  (let ((fname (format "%s.%s"
                         (file-name-base (buffer-file-name))
                         (file-name-extension (buffer-file-name))))
          (content (buffer-substring-no-properties (region-beginning) (region-end))))
