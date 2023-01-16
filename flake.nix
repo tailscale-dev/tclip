@@ -44,8 +44,8 @@
           };
 
           docker = pkgs.dockerTools.buildLayeredImage {
-            name = "infinipaste";
-            tag = "latest";
+            name = "ghcr.io/tailscale-dev/infinipaste";
+            tag = "main";
             config.Cmd = [ "${web}/bin/web" ];
             contents = [ pkgs.cacert ];
           };

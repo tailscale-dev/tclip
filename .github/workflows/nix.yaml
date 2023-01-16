@@ -1,0 +1,31 @@
+name: "Nix build"
+on:
+  pull_request:
+  push:
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v18
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: "Basic CLI and web build"
+      run: |
+        nix build .#infinipaste .#web
+    - name: "Docker image build"
+      run: |
+        nix build .#docker
+        docker load < ./result
+    - name: "Docker image push"
+      if: "github.event_name == 'push' && github.ref_name == 'main'"
+      run: |
+        docker push ghcr.io/tailscale-dev/infinipaste:main
+    - name: "Portable service build"
+      run: |
+        nix build .#portable-service
+    - uses: actions/upload-artifact@v3
+      with:
+        name: portable-service
+        path: ./result/*
+      

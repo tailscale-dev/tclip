@@ -39,6 +39,8 @@ basic deployment method is to use [fly.io](https://fly.io), but we
 offer a few options so that you can make the decision that is right
 for you.
 
+### Prerequisites
+
 In order to deploy this service, you will need to get an authkey from
 [the admin panel](https://login.tailscale.com/admin/settings/keys). It
 is a good idea to associate this with the tag `tag:service` or its own
@@ -46,6 +48,10 @@ is a good idea to associate this with the tag `tag:service` or its own
 will destroy the node when the service shuts down.
 
 Your authkey should start with `tskey-auth`.
+
+You will need to have Magic DNS enabled.
+
+You will need to have 
 
 ### fly.io
 
