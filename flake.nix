@@ -54,7 +54,7 @@
             web-service = pkgs.substituteAll {
               name = "infinipaste.service";
               src = ./run/portable-service/infinipaste.service.in;
-              infinipaste = web;
+              inherit web;
             };
           in pkgs.portableService {
             inherit (web) version;

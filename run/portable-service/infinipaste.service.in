@@ -6,8 +6,9 @@ Documentation=https://github.com/tailscale-dev/infinipaste
 DynamicUser=yes
 StateDirectory=infinipaste
 Environment=DATA_DIR=/var/lib/private/infinipaste/data
-WorkingDirectory=/var/lib/private/infinipaste
 ExecStart=@web@/bin/web
+Restart=always
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target
