@@ -1,4 +1,4 @@
-module github.com/tailscale/paste
+module github.com/tailscale-dev/infinipaste
 
 go 1.19
 

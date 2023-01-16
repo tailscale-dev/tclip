@@ -1,6 +1,7 @@
-# paste
+# infinipaste
 
-A self-hostable pastebin for your tailnet.
+A self-hostable pastebin for your tailnet. It can store an infinite\*
+number of pastes.
 
 ## Development
 
@@ -11,7 +12,7 @@ A self-hostable pastebin for your tailnet.
 ## Building
 
 ```
-nix build .#bin
+nix build .#web
 ```
 
 ```
