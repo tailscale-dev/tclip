@@ -15,7 +15,7 @@ jobs:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - name: "Basic CLI and web build"
       run: |
-        nix build .#infinipaste .#web
+        nix build .#tclip .#web
     - name: "Docker image build"
       run: |
         nix build .#docker
@@ -30,7 +30,7 @@ jobs:
     - name: "Docker image push"
       if: "github.event_name == 'push' && github.ref_name == 'main'"
       run: |
-        docker push ghcr.io/tailscale-dev/infinipaste:main
+        docker push ghcr.io/tailscale-dev/tclip:main
     - name: "Portable service build"
       run: |
         nix build .#portable-service
