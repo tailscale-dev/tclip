@@ -34,8 +34,10 @@ jobs:
     - name: "Portable service build"
       run: |
         nix build .#portable-service
+        mkdir -p var
+        cp ./result/*.raw ./var
     - uses: actions/upload-artifact@v3
       with:
         name: portable-service
-        path: ./result/*
+        path: ./var/*.raw
       
