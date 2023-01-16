@@ -13,17 +13,17 @@
 
 <h2 id="cli">Command-line tool</h2>
 
-<p>You can pipe commands or paste files to the pastebin using the command <code>infinipaste</code>. You can install it by installing the <a href="https://go.dev">Go</a> compiler toolkit and then running this command:</p>
+<p>You can pipe commands or paste files to the pastebin using the command <code>tclip</code>. You can install it by installing the <a href="https://go.dev">Go</a> compiler toolkit and then running this command:</p>
 
-<pre><code>go get github.com/tailscale-dev/infinipaste/cmd/infinipaste@main</code></pre>
+<pre><code>go get github.com/tailscale-dev/tclip/cmd/tclip@main</code></pre>
 
-<p>Once it is installed, invoke it with the command <code>infinipaste</code>:</p>
+<p>Once it is installed, invoke it with the command <code>tclip</code>:</p>
 
-<pre><code>infinipaste ./foo.txt</code></pre>
+<pre><code>tclip ./foo.txt</code></pre>
 
 <p>and the program will print a URL that you can share with your team. You can also pipe the output from any command to it:</p>
 
-<pre><code>go test &amp;2&lt;1 | infinipaste -n go-test.txt</code></pre>
+<pre><code>go test &amp;2&lt;1 | tclip -n go-test.txt</code></pre>
 
 <h2 id="api">API</h2>
 
@@ -52,13 +52,13 @@
 
 <h3 id="emacs">Emacs package</h3>
 
-<p>The default distribution of infinipaste ships with a package for <a href="https://www.gnu.org/software/emacs/">GNU Emacs</a>. This package will let you submit pastes from your editor. It requires the <a href="https://github.com/tkf/emacs-request"><code>request</code></a> package and exposes two interactive functions:</p>
+<p>The default distribution of tclip ships with a package for <a href="https://www.gnu.org/software/emacs/">GNU Emacs</a>. This package will let you submit pastes from your editor. It requires the <a href="https://github.com/tkf/emacs-request"><code>request</code></a> package and exposes two interactive functions:</p>
 
 <ul>
-    <li><code>M-x infinipaste-submit-region</code> - submits the currently highlighted region to infinipaste</li>
-    <li><code>M-x infinipaste-submit-buffer</code> - submits the contents of the current buffer to infinipaste</li>
+    <li><code>M-x tclip-submit-region</code> - submits the currently highlighted region to tclip</li>
+    <li><code>M-x tclip-submit-buffer</code> - submits the contents of the current buffer to tclip</li>
 </ul>
 
-<p>You can download this package <a href="https://github.com/tailscale-dev/infinipaste/blob/main/contrib/infinipaste.el">from the infinipaste repository</a>. You can install it by using <code>M-x package-install-file</code> or by opening it in Emacs and running <code>M-x package-install-from-buffer</code>. Please be sure that <code>request</code> is installed.</p>
+<p>You can download this package <a href="https://github.com/tailscale-dev/tclip/blob/main/contrib/tclip.el">from the tclip repository</a>. You can install it by using <code>M-x package-install-file</code> or by opening it in Emacs and running <code>M-x package-install-from-buffer</code>. Please be sure that <code>request</code> is installed.</p>
 
 {{template "footer" .}}

@@ -1,4 +1,4 @@
-module github.com/tailscale-dev/infinipaste
+module github.com/tailscale-dev/tclip
 
 go 1.19
 

@@ -28,23 +28,23 @@
       in {
         packages = rec {
           web = pkgs.buildGoApplication {
-            pname = "infinipaste-web";
+            pname = "tclip-web";
             version = "0.1.0-${version}";
             src = ./.;
             subPackages = "cmd/web";
             modules = ./gomod2nix.toml;
           };
 
-          infinipaste = pkgs.buildGoApplication {
-            pname = "infinipaste";
+          tclip = pkgs.buildGoApplication {
+            pname = "tclip";
             inherit (web) src version modules;
-            subPackages = "cmd/infinipaste";
+            subPackages = "cmd/tclip";
 
             CGO_ENABLED = "0";
           };
 
           docker = pkgs.dockerTools.buildLayeredImage {
-            name = "ghcr.io/tailscale-dev/infinipaste";
+            name = "ghcr.io/tailscale-dev/tclip";
             tag = "main";
             config.Cmd = [ "${web}/bin/web" ];
             contents = [ pkgs.cacert ];
@@ -52,15 +52,15 @@
 
           portable-service = let
             web-service = pkgs.substituteAll {
-              name = "infinipaste.service";
-              src = ./run/portable-service/infinipaste.service.in;
+              name = "tclip.service";
+              src = ./run/portable-service/tclip.service.in;
               inherit web;
             };
           in pkgs.portableService {
             inherit (web) version;
-            pname = "infinipaste";
-            description = "The infinipaste service";
-            homepage = "https://github.com/tailscale-dev/infinipaste";
+            pname = "tclip";
+            description = "The tclip service";
+            homepage = "https://github.com/tailscale-dev/tclip";
             units = [ web-service ];
             symlinks = [{
               object = "${pkgs.cacert}/etc/ssl";
