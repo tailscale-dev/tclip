@@ -20,6 +20,13 @@ jobs:
       run: |
         nix build .#docker
         docker load < ./result
+    - name: "docker login"
+      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+      if: "github.event_name == 'push' && github.ref_name == 'main'"
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - name: "Docker image push"
       if: "github.event_name == 'push' && github.ref_name == 'main'"
       run: |
