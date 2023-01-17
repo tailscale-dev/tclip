@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"embed"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -250,7 +251,7 @@ OFFSET ?1
 		pageNum = 0
 	}
 
-	rows, err := s.db.Query(q, clampToZero(pageNum) * 25)
+	rows, err := s.db.Query(q, clampToZero(pageNum)*25)
 	if err != nil {
 		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
@@ -340,6 +341,60 @@ func clampToZero(i int) int {
 	return i
 }
 
+func (s *Server) TailnetDeletePost(w http.ResponseWriter, r *http.Request) {
+	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	if err != nil {
+		s.ShowError(w, r, err, http.StatusBadRequest)
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "must GET", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// /api/delete/{id}
+	sp := strings.Split(r.URL.Path, "/")
+	if len(sp) != 4 {
+		s.ShowError(w, r, errors.New("must be /api/delete/:id"), http.StatusBadRequest)
+	}
+	id := sp[3]
+
+	if len(sp) == 0 {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	q := `
+SELECT p.user_id
+FROM pastes p
+WHERE p.id = ?1`
+
+	row := s.db.QueryRowContext(r.Context(), q, id)
+	var userIDOfPaste int64
+	if err := row.Scan(&userIDOfPaste); err != nil {
+		s.ShowError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	if int64(ui.UserProfile.ID) != userIDOfPaste {
+		s.ShowError(w, r, errors.New("can only delete your pastes"), http.StatusForbidden)
+		return
+	}
+
+	q = `
+DELETE FROM pastes
+WHERE id = ?1 AND user_id = ?2
+`
+
+	if _, err := s.db.ExecContext(r.Context(), q, id, ui.UserProfile.ID); err != nil {
+		s.ShowError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+}
+
 func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
 	ui, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	var up *tailcfg.UserProfile
@@ -376,7 +431,8 @@ INNER JOIN users u
 WHERE p.id = ?1`
 
 	row := s.db.QueryRowContext(r.Context(), q, id)
-	var fname, data, userID, userLoginName, userDisplayName, userProfilePicURL string
+	var fname, data, userLoginName, userDisplayName, userProfilePicURL string
+	var userID int64
 	var createdAt string
 
 	err := row.Scan(&fname, &createdAt, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
@@ -412,6 +468,8 @@ WHERE p.id = ?1`
 		CreatedAt           string
 		PasterDisplayName   string
 		PasterProfilePicURL string
+		PasterUserID        int64
+		UserID              int64
 		ID                  string
 		Data                string
 	}{
@@ -420,6 +478,8 @@ WHERE p.id = ?1`
 		CreatedAt:           createdAt,
 		PasterDisplayName:   userDisplayName,
 		PasterProfilePicURL: userProfilePicURL,
+		PasterUserID:        userID,
+		UserID:              int64(up.ID),
 		ID:                  id,
 		Data:                data,
 	})
@@ -493,6 +553,7 @@ func main() {
 	tailnetMux.HandleFunc("/paste/", srv.ShowPost)
 	tailnetMux.HandleFunc("/paste/list", srv.TailnetPasteIndex)
 	tailnetMux.HandleFunc("/api/post", srv.TailnetSubmitPaste)
+	tailnetMux.HandleFunc("/api/delete/", srv.TailnetDeletePost)
 	tailnetMux.HandleFunc("/", srv.TailnetIndex)
 	tailnetMux.HandleFunc("/help", srv.TailnetHelp)
 
