@@ -90,6 +90,10 @@ $ flyctl deploy
 You should be able to open the app at [http://paste](http://paste) and
 paste to your heart's content.
 
+#### Updating
+
+Run `flyctl deploy` to update the service.
+
 ### Normal Docker
 
 To run this service in Docker, run the following command:
@@ -104,6 +108,8 @@ docker run \
   --restart always \
   ghcr.io/tailscale-dev/tclip:main
 ```
+
+#### Updating
 
 Every so often you should pull a new version of tclip and
 recreate the container:
@@ -129,14 +135,14 @@ install tclip on any Linux distribution with systemd (and the
 on Ubuntu). This lets you view tclip logs with `journalctl` and
 manage it like any other systemd service.
 
-Download the portable service image yada yada TODO(Xe) fix this
-
-```console
-TODO(Xe): this
-```
-
-Then run `portablectl list` to get a list of available portable
-services:
+You can download the portable service image from CI by looking at the
+[recently finished
+builds](https://github.com/tailscale-dev/tclip/actions?query=is%3Asuccess+branch%3Amain),
+clicking on the most recent one, and downloading the
+`portable-service` artifact. This will get you a zipfile that contains
+a single `.raw` file. Copy this `.raw` file to `/var/lib/portable` on
+your target server. Then run `portablectl list` to get a list of
+available portable services:
 
 ```console
 $ portablectl list
@@ -153,12 +159,13 @@ $ sudo portablectl attach tclip_0.1.0-20230116
 ```
 
 Next, create the folder `/etc/systemd/system/tclip.service.d`
-and create the file `10-ts-auth-key.conf` in it with the following contents:
+and create the file `10-ts-auth-key.conf` in it with the following
+contents (be sure to replace `<key>` with your tailnet authkey):
 
 ```systemd
-# /etc/systemd/system/tclip.service.d/10-ts-auth-key.conf
+# /etc/systemd/system/tclip.service.d/10-ts-authkey.conf
 [Service]
-Environment=TS_AUTH_KEY=<key>
+Environment=TS_AUTHKEY=<key>
 ```
 
 Finally, enable `tclip.service` and start it with `systemctl
@@ -171,6 +178,13 @@ $ sudo systemctl enable --now tclip.service
 Wait a moment for it to connect to Tailscale and then check on it with
 `tailscale status`. Your new node named `paste` should show up in your
 tailnet.
+
+#### Updating
+
+To update tclip, first detach the portable service using `portablectl
+detach` after finding the list with `portablectl list`. Then delete
+the correlating `.raw` file in `/var/lib/portables`. Download a new
+one in its place and re-attach and re-enable the service.
 
 #### Backups
 
