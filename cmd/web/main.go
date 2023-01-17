@@ -250,7 +250,7 @@ OFFSET ?1
 		pageNum = 0
 	}
 
-	rows, err := s.db.Query(q, clampToZero(pageNum))
+	rows, err := s.db.Query(q, clampToZero(pageNum) * 25)
 	if err != nil {
 		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
