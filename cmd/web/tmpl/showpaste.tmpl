@@ -1,11 +1,11 @@
 {{template "header" .}}
 
-<div class="right"><img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+<div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
 
-<p>Created at {{.CreatedAt}} by {{.PasterDisplayName}}</p>
+<p>Created at {{.CreatedAt}}</p>
 
 <pre><code>{{.Data}}
 </code></pre>
 
-<a href="/paste/{{.ID}}">Permalink</a> - <a href="/paste/{{.ID}}/dl">Download</a> - <a href="/paste/{{.ID}}/raw">Raw</a>
+<a href="/paste/{{.ID}}">Permalink</a> - <a href="/paste/{{.ID}}/dl">Download</a> - <a href="/paste/{{.ID}}/raw">Raw</a>{{if eq .UserID .PasterUserID}} - <a href="/api/delete/{{.ID}}">Delete</a>{{end}}
 {{template "footer" .}}
