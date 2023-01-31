@@ -64,7 +64,7 @@ into that folder.
 app = "FLY_APP_NAME"
 
 [build]
-image = "ghcr.io/tailscale-dev/tclip:main"
+image = "ghcr.io/tailscale-dev/tclip:latest"
 
 [deploy]
 strategy = "immediate"
@@ -106,7 +106,7 @@ docker run \
   -e TS_AUTHKEY=<key> \
   -n tclip \
   --restart always \
-  ghcr.io/tailscale-dev/tclip:main
+  ghcr.io/tailscale-dev/tclip:latest
 ```
 
 #### Updating
@@ -115,7 +115,7 @@ Every so often you should pull a new version of tclip and
 recreate the container:
 
 ```
-docker pull ghcr.io/tailscale-dev/tclip:main
+docker pull ghcr.io/tailscale-dev/tclip:latest
 docker rm -f tclip
 ```
 

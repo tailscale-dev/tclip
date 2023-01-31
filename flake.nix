@@ -45,7 +45,7 @@
 
           docker = pkgs.dockerTools.buildLayeredImage {
             name = "ghcr.io/tailscale-dev/tclip";
-            tag = "main";
+            tag = "latest";
             config.Cmd = [ "${web}/bin/web" ];
             contents = [ pkgs.cacert ];
           };
