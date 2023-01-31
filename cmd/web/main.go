@@ -30,7 +30,7 @@ import (
 var (
 	hostname        = flag.String("hostname", envOr("TSNET_HOSTNAME", "paste"), "hostname to use on your tailnet, TSNET_HOSTNAME in the environment")
 	dataDir         = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
-	tsnetLogVerbose = flag.Bool("tsnet-verbose", false, "if set, have tsnet log verbosely to standard error")
+	tsnetLogVerbose = flag.Bool("tsnet-verbose", os.Getenv("TSNET_VERBOSE") != "", "if set, have tsnet log verbosely to standard error")
 
 	//go:embed schema.sql
 	sqlSchema string
