@@ -45,6 +45,9 @@ var (
 const formDataLimit = 64 * 1024 // 64 kilobytes (approx. 32 printed pages of text)
 
 func dataLocation() string {
+	if dir, ok := os.LookupEnv("DATA_DIR"); ok {
+		return dir
+	}
 	dir, err := os.UserConfigDir()
 	if err != nil {
 		return os.Getenv("DATA_DIR")
