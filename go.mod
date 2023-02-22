@@ -3,6 +3,7 @@ module github.com/tailscale-dev/tclip
 go 1.19
 
 require (
+	github.com/go-enry/go-enry/v2 v2.8.3
 	github.com/google/uuid v1.3.0
 	github.com/tailscale/sqlite v0.0.0-20221025150348-0716cf4a392b
 	tailscale.com v1.34.0
@@ -27,6 +28,7 @@ require (
 	github.com/aws/smithy-go v1.9.0 // indirect
 	github.com/coreos/go-iptables v0.6.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
+	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
