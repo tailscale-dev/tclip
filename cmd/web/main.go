@@ -81,12 +81,47 @@ func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	q := `
+SELECT p.id
+     , p.filename
+     , p.created_at
+     , u.display_name
+FROM pastes p
+INNER JOIN users u
+  ON p.user_id = u.id
+ORDER BY p.rowid DESC
+LIMIT 5
+`
+
+	jpis := make([]JoinedPasteInfo, 0, 5)
+
+	rows, err := s.db.QueryContext(r.Context(), q)
+	if err != nil {
+		s.ShowError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		jpi := JoinedPasteInfo{}
+
+		err := rows.Scan(&jpi.ID, &jpi.Filename, &jpi.CreatedAt, &jpi.PasterDisplayName)
+		if err != nil {
+			s.ShowError(w, r, err, http.StatusInternalServerError)
+			return
+		}
+
+		jpis = append(jpis, jpi)
+	}
+
 	err = s.tmpls.ExecuteTemplate(w, "create.tmpl", struct {
-		UserInfo *tailcfg.UserProfile
-		Title    string
+		UserInfo     *tailcfg.UserProfile
+		Title        string
+		RecentPastes []JoinedPasteInfo
 	}{
-		UserInfo: ui.UserProfile,
-		Title:    "Create new paste",
+		UserInfo:     ui.UserProfile,
+		Title:        "Create new paste",
+		RecentPastes: jpis,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
@@ -213,6 +248,13 @@ VALUES
 
 }
 
+type JoinedPasteInfo struct {
+	ID                string `json:"id"`
+	Filename          string `json:"fname"`
+	CreatedAt         string `json:"created_at"`
+	PasterDisplayName string `json:"created_by"`
+}
+
 func (s *Server) TailnetPasteIndex(w http.ResponseWriter, r *http.Request) {
 	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
@@ -221,13 +263,6 @@ func (s *Server) TailnetPasteIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = userInfo
-
-	type JoinedPasteInfo struct {
-		ID                string `json:"id"`
-		Filename          string `json:"fname"`
-		CreatedAt         string `json:"created_at"`
-		PasterDisplayName string `json:"created_by"`
-	}
 
 	q := `
 SELECT p.id

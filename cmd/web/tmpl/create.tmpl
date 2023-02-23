@@ -9,5 +9,18 @@
 
 <br />
 <br />
+
+{{if len .RecentPastes | eq 0}}
+<p>There are no pastes in the list. Create one to share with your team!</p>
+{{else}}
+<h2>Recent pastes</h2>
+<ul>
+    {{range .RecentPastes}}
+    <li><a href="/paste/{{.ID}}">{{.Filename}}</a> - {{.CreatedAt}} - {{.PasterDisplayName}}</li>
+    {{end}}
+</ul>
+
 <a href="/paste/list">See all pastes</a>
+{{end}}
+
 {{template "footer" .}}
