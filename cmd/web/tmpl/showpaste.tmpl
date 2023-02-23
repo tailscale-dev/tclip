@@ -1,5 +1,7 @@
 {{template "header" .}}
 
+<script src="/static/js/prism.js"></script>
+
 {{if .UserInfo}}
 {{if ne .PasterUserID .UserID}}
 <div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
@@ -10,8 +12,10 @@
 
 <p>Created at {{.CreatedAt}}</p>
 
-<pre><code>{{.Data}}
+<div style="display:inline-block;">
+<pre><code class="{{.CSSClass}}">{{.Data}}
 </code></pre>
+</div>
 
 <a href="/paste/{{.ID}}">Permalink</a> - <a href="/paste/{{.ID}}/dl">Download</a> - <a href="/paste/{{.ID}}/raw">Raw</a>{{if eq .UserID .PasterUserID}} - <a href="/api/delete/{{.ID}}">Delete</a>{{end}}
 
