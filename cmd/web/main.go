@@ -19,6 +19,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/go-enry/go-enry/v2"
 	"github.com/google/uuid"
 	"github.com/tailscale/sqlite"
 	"tailscale.com/client/tailscale"
@@ -465,6 +466,13 @@ WHERE p.id = ?1`
 		}
 	}
 
+	lang, _ := enry.GetLanguageByContent(fname, []byte(data))
+
+	var cssClass string
+	if lang != "" {
+		cssClass = fmt.Sprintf("lang-%s", lang)
+	}
+
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
 		UserInfo            *tailcfg.UserProfile
 		Title               string
@@ -475,6 +483,7 @@ WHERE p.id = ?1`
 		UserID              int64
 		ID                  string
 		Data                string
+		CSSClass            string
 	}{
 		UserInfo:            up,
 		Title:               fname,
@@ -485,6 +494,7 @@ WHERE p.id = ?1`
 		UserID:              int64(up.ID),
 		ID:                  id,
 		Data:                data,
+		CSSClass:            cssClass,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)

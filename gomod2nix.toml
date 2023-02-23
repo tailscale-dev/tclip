@@ -55,6 +55,12 @@ schema = 3
   [mod."github.com/fxamacker/cbor/v2"]
     version = "v2.4.0"
     hash = "sha256-LwOrfDN5fx/R2lgaD90RIu2NxcJDpyqYEURLc9Kgxgw="
+  [mod."github.com/go-enry/go-enry/v2"]
+    version = "v2.8.3"
+    hash = "sha256-xVkCSN3Bj1PgLy/Zb5XYYBnOUFKgKsLfAARlPDHe+kA="
+  [mod."github.com/go-enry/go-oniguruma"]
+    version = "v1.2.1"
+    hash = "sha256-DoCNyX75CuCgFnfSZs63VB4+HAIMDBgwcQglXXHRj/I="
   [mod."github.com/go-ole/go-ole"]
     version = "v1.2.6"
     hash = "sha256-+oxitLeJxYF19Z6g+6CgmCHJ1Y5D8raMi2Cb3M6nXCs="
