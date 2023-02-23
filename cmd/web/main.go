@@ -244,7 +244,7 @@ VALUES
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "https://%s/paste/%s", s.httpsURL, id)
 	default:
-		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusCreated)
+		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
 	}
 
 }
