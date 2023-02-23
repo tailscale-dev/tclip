@@ -460,8 +460,11 @@ WHERE p.id = ?1`
 
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, data)
+			return
+		case "":
 		default:
 			s.NotFound(w, r)
+			return
 		}
 	}
 
