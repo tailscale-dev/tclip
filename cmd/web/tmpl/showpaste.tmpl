@@ -2,7 +2,13 @@
 
 <script src="/static/js/prism.js"></script>
 
+{{if .UserInfo}}
+{{if ne .PasterUserID .UserID}}
 <div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+{{end}}
+{{else}}
+<div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+{{end}}
 
 <p>Created at {{.CreatedAt}}</p>
 
