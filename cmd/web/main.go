@@ -10,17 +10,20 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/go-enry/go-enry/v2"
 	"github.com/google/uuid"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/russross/blackfriday"
 	"github.com/tailscale/sqlite"
 	"tailscale.com/client/tailscale"
 	"tailscale.com/client/tailscale/apitype"
@@ -244,7 +247,7 @@ VALUES
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "https://%s/paste/%s", s.httpsURL, id)
 	default:
-		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusCreated)
+		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
 	}
 
 }
@@ -501,11 +504,25 @@ WHERE p.id = ?1`
 		}
 	}
 
-	lang, _ := enry.GetLanguageByContent(fname, []byte(data))
+	lang, safe := enry.GetLanguageByContent(fname, []byte(data))
+	if !safe {
+		lang, _ = enry.GetLanguageByExtension(fname)
+	}
+
+	var rawHTML *template.HTML
 
 	var cssClass string
 	if lang != "" {
-		cssClass = fmt.Sprintf("lang-%s", lang)
+		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
+	}
+
+	if lang == "Markdown" || filepath.Ext(fname) == ".markdown" {
+		output := blackfriday.MarkdownCommon([]byte(data))
+		p := bluemonday.UGCPolicy()
+		p.AllowAttrs("class").Matching(regexp.MustCompile("^language-[a-zA-Z0-9]+$")).OnElements("code")
+		sanitized := p.SanitizeBytes(output)
+		raw := template.HTML(string(sanitized))
+		rawHTML = &raw
 	}
 
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
@@ -518,6 +535,7 @@ WHERE p.id = ?1`
 		UserID              int64
 		ID                  string
 		Data                string
+		RawHTML             *template.HTML
 		CSSClass            string
 	}{
 		UserInfo:            up,
@@ -529,6 +547,7 @@ WHERE p.id = ?1`
 		UserID:              int64(up.ID),
 		ID:                  id,
 		Data:                data,
+		RawHTML:             rawHTML,
 		CSSClass:            cssClass,
 	})
 	if err != nil {
