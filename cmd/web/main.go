@@ -449,15 +449,15 @@ func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sp := strings.Split(r.URL.Path, "/")
-	sp = sp[2:]
+	pathComponents := strings.Split(r.URL.Path, "/")
+	pathComponents = pathComponents[2:]
 
-	if len(sp) == 0 {
+	if len(pathComponents) == 0 {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
-	id := sp[0]
+	id := pathComponents[0]
 
 	q := `
 SELECT p.filename
@@ -483,19 +483,24 @@ WHERE p.id = ?1`
 		return
 	}
 
-	lang, safe := enry.GetLanguageByContent(fname, []byte(data))
+	lang, safe := enry.GetLanguageByFilename(fname)
 	if !safe {
-		lang, _ = enry.GetLanguageByExtension(fname)
+		lang, _ = enry.GetLanguageByContent(fname, []byte(data))
 	}
 
 	var rawHTML *template.HTML
+
+	// XXX(Xe): HACK around https://github.com/go-enry/go-enry/pull/154
+	if filepath.Ext(fname) == ".markdown" {
+		lang = "Markdown"
+	}
 
 	var cssClass string
 	if lang != "" {
 		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
 	}
 
-	if lang == "Markdown" || filepath.Ext(fname) == ".markdown" {
+	if lang == "Markdown" {
 		output := blackfriday.MarkdownCommon([]byte(data))
 		p := bluemonday.UGCPolicy()
 		p.AllowAttrs("class").Matching(regexp.MustCompile("^language-[a-zA-Z0-9]+$")).OnElements("code")
@@ -504,8 +509,10 @@ WHERE p.id = ?1`
 		rawHTML = &raw
 	}
 
-	if len(sp) != 1 {
-		switch sp[1] {
+	// If you specify a formatting option:
+	if len(pathComponents) != 1 {
+		switch pathComponents[1] {
+		// view file as plain text in browser
 		case "raw":
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
@@ -513,6 +520,7 @@ WHERE p.id = ?1`
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, data)
 			return
+		// download file to disk (plain text view plus download hint)
 		case "dl":
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
@@ -520,15 +528,16 @@ WHERE p.id = ?1`
 
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, data)
+		// view markdown file with a fancy HTML rendering step
 		case "md":
 			if lang != "Markdown" {
 				http.Redirect(w, r, "/paste/"+id, http.StatusTemporaryRedirect)
 				return
 			}
 
-			title, ok := yankTitle(data)
+			title, ok := strings.CutPrefix(strings.Split(strings.TrimSpace(data), "\n")[0], "#")
 			if !ok {
-				title = fmt.Sprintf("Post by %s")
+				title = fname
 			}
 
 			err = s.tmpls.ExecuteTemplate(w, "fancypost.tmpl", struct {
@@ -548,6 +557,7 @@ WHERE p.id = ?1`
 				log.Printf("%s: %v", r.RemoteAddr, err)
 			}
 			return
+		// otherwise, throw a 404
 		default:
 			s.NotFound(w, r)
 		}
@@ -581,24 +591,6 @@ WHERE p.id = ?1`
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
 	}
-}
-
-func yankTitle(input string) (string, bool) {
-	if !strings.HasPrefix(input, "#") {
-		return "", false
-	}
-
-	sp := strings.SplitN(input, "\n", 2)
-
-	if len(sp) != 2 {
-		return "", false
-	}
-
-	titleLine, _ := strings.CutPrefix(sp[0], "#")
-
-	titleLine = strings.TrimSpace(titleLine)
-
-	return titleLine, true
 }
 
 func main() {
