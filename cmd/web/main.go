@@ -522,7 +522,7 @@ WHERE p.id = ?1`
 			fmt.Fprint(w, data)
 		case "md":
 			if lang != "Markdown" {
-				http.Redirect(w, r, "/pastes/"+id, http.StatusTemporaryRedirect)
+				http.Redirect(w, r, "/paste/"+id, http.StatusTemporaryRedirect)
 				return
 			}
 
