@@ -483,27 +483,6 @@ WHERE p.id = ?1`
 		return
 	}
 
-	if len(sp) != 1 {
-		switch sp[1] {
-		case "raw":
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
-
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, data)
-			return
-		case "dl":
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
-			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
-
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprint(w, data)
-		default:
-			s.NotFound(w, r)
-		}
-	}
-
 	lang, safe := enry.GetLanguageByContent(fname, []byte(data))
 	if !safe {
 		lang, _ = enry.GetLanguageByExtension(fname)
@@ -523,6 +502,55 @@ WHERE p.id = ?1`
 		sanitized := p.SanitizeBytes(output)
 		raw := template.HTML(string(sanitized))
 		rawHTML = &raw
+	}
+
+	if len(sp) != 1 {
+		switch sp[1] {
+		case "raw":
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, data)
+			return
+		case "dl":
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
+			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, data)
+		case "md":
+			if lang != "Markdown" {
+				http.Redirect(w, r, "/pastes/"+id, http.StatusTemporaryRedirect)
+				return
+			}
+
+			title, ok := yankTitle(data)
+			if !ok {
+				title = fmt.Sprintf("Post by %s")
+			}
+
+			err = s.tmpls.ExecuteTemplate(w, "fancypost.tmpl", struct {
+				Title               string
+				CreatedAt           string
+				PasterDisplayName   string
+				PasterProfilePicURL string
+				RawHTML             *template.HTML
+			}{
+				Title:               title,
+				CreatedAt:           createdAt,
+				PasterDisplayName:   userDisplayName,
+				PasterProfilePicURL: userProfilePicURL,
+				RawHTML:             rawHTML,
+			})
+			if err != nil {
+				log.Printf("%s: %v", r.RemoteAddr, err)
+			}
+			return
+		default:
+			s.NotFound(w, r)
+		}
 	}
 
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
@@ -553,6 +581,24 @@ WHERE p.id = ?1`
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
 	}
+}
+
+func yankTitle(input string) (string, bool) {
+	if !strings.HasPrefix(input, "#") {
+		return "", false
+	}
+
+	sp := strings.SplitN(input, "\n", 2)
+
+	if len(sp) != 2 {
+		return "", false
+	}
+
+	titleLine, _ := strings.CutPrefix(sp[0], "#")
+
+	titleLine = strings.TrimSpace(titleLine)
+
+	return titleLine, true
 }
 
 func main() {
