@@ -10,17 +10,20 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/go-enry/go-enry/v2"
 	"github.com/google/uuid"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/russross/blackfriday"
 	"github.com/tailscale/sqlite"
 	"tailscale.com/client/tailscale"
 	"tailscale.com/client/tailscale/apitype"
@@ -446,15 +449,15 @@ func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sp := strings.Split(r.URL.Path, "/")
-	sp = sp[2:]
+	pathComponents := strings.Split(r.URL.Path, "/")
+	pathComponents = pathComponents[2:]
 
-	if len(sp) == 0 {
+	if len(pathComponents) == 0 {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
-	id := sp[0]
+	id := pathComponents[0]
 
 	q := `
 SELECT p.filename
@@ -480,8 +483,36 @@ WHERE p.id = ?1`
 		return
 	}
 
-	if len(sp) != 1 {
-		switch sp[1] {
+	lang, safe := enry.GetLanguageByFilename(fname)
+	if !safe {
+		lang, _ = enry.GetLanguageByContent(fname, []byte(data))
+	}
+
+	var rawHTML *template.HTML
+
+	// XXX(Xe): HACK around https://github.com/go-enry/go-enry/pull/154
+	if filepath.Ext(fname) == ".markdown" {
+		lang = "Markdown"
+	}
+
+	var cssClass string
+	if lang != "" {
+		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
+	}
+
+	if lang == "Markdown" {
+		output := blackfriday.MarkdownCommon([]byte(data))
+		p := bluemonday.UGCPolicy()
+		p.AllowAttrs("class").Matching(regexp.MustCompile("^language-[a-zA-Z0-9]+$")).OnElements("code")
+		sanitized := p.SanitizeBytes(output)
+		raw := template.HTML(string(sanitized))
+		rawHTML = &raw
+	}
+
+	// If you specify a formatting option:
+	if len(pathComponents) != 1 {
+		switch pathComponents[1] {
+		// view file as plain text in browser
 		case "raw":
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
@@ -489,6 +520,7 @@ WHERE p.id = ?1`
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, data)
 			return
+		// download file to disk (plain text view plus download hint)
 		case "dl":
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
@@ -496,16 +528,39 @@ WHERE p.id = ?1`
 
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, data)
+		// view markdown file with a fancy HTML rendering step
+		case "md":
+			if lang != "Markdown" {
+				http.Redirect(w, r, "/paste/"+id, http.StatusTemporaryRedirect)
+				return
+			}
+
+			title, ok := strings.CutPrefix(strings.Split(strings.TrimSpace(data), "\n")[0], "#")
+			if !ok {
+				title = fname
+			}
+
+			err = s.tmpls.ExecuteTemplate(w, "fancypost.tmpl", struct {
+				Title               string
+				CreatedAt           string
+				PasterDisplayName   string
+				PasterProfilePicURL string
+				RawHTML             *template.HTML
+			}{
+				Title:               title,
+				CreatedAt:           createdAt,
+				PasterDisplayName:   userDisplayName,
+				PasterProfilePicURL: userProfilePicURL,
+				RawHTML:             rawHTML,
+			})
+			if err != nil {
+				log.Printf("%s: %v", r.RemoteAddr, err)
+			}
+			return
+		// otherwise, throw a 404
 		default:
 			s.NotFound(w, r)
 		}
-	}
-
-	lang, _ := enry.GetLanguageByContent(fname, []byte(data))
-
-	var cssClass string
-	if lang != "" {
-		cssClass = fmt.Sprintf("lang-%s", lang)
 	}
 
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
@@ -518,6 +573,7 @@ WHERE p.id = ?1`
 		UserID              int64
 		ID                  string
 		Data                string
+		RawHTML             *template.HTML
 		CSSClass            string
 	}{
 		UserInfo:            up,
@@ -529,6 +585,7 @@ WHERE p.id = ?1`
 		UserID:              int64(up.ID),
 		ID:                  id,
 		Data:                data,
+		RawHTML:             rawHTML,
 		CSSClass:            cssClass,
 	})
 	if err != nil {

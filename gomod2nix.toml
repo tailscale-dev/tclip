@@ -49,6 +49,9 @@ schema = 3
   [mod."github.com/aws/smithy-go"]
     version = "v1.9.0"
     hash = "sha256-16+xMW6OdwieP3NDaBOXfUc4HnXy8H0UJB1K+j1IUNA="
+  [mod."github.com/aymerick/douceur"]
+    version = "v0.2.0"
+    hash = "sha256-NiBX8EfOvLXNiK3pJaZX4N73YgfzdrzRXdiBFe3X3sE="
   [mod."github.com/coreos/go-iptables"]
     version = "v0.6.0"
     hash = "sha256-hB+9XsybJuEFozAXo+G8+2qMMZGoqBbMmSwmcNJgmSU="
@@ -79,6 +82,9 @@ schema = 3
   [mod."github.com/google/uuid"]
     version = "v1.3.0"
     hash = "sha256-QoR55eBtA94T2tBszyxfDtO7/pjZZSGb5vm7U0Xhs0Y="
+  [mod."github.com/gorilla/css"]
+    version = "v1.0.0"
+    hash = "sha256-Mmt/IqHpgrtWpbr/AKcJyf/USQTqEuv1HVivY4eHzoQ="
   [mod."github.com/hdevalence/ed25519consensus"]
     version = "v0.0.0-20220222234857-c00d1f31bab3"
     hash = "sha256-1ec2xc7l9oNtWJwVtx14HnozMZCe2DpfXmu1xI1Z/yo="
@@ -115,12 +121,18 @@ schema = 3
   [mod."github.com/mdlayher/socket"]
     version = "v0.2.3"
     hash = "sha256-EDaSQ621SJ2OK2WycMtybuJ2KpaH86JHknqsiduuCtQ="
+  [mod."github.com/microcosm-cc/bluemonday"]
+    version = "v1.0.22"
+    hash = "sha256-JgukDv0Qlh3y9osBZ+MCCk0cL0JSPfOJikmQ5mjMxCE="
   [mod."github.com/mitchellh/go-ps"]
     version = "v1.0.0"
     hash = "sha256-HzxVHNLHZpnsBuPcub0G+9jjDcDOsxM/6wifbsxf7EY="
   [mod."github.com/pkg/errors"]
     version = "v0.9.1"
     hash = "sha256-mNfQtcrQmu3sNg/7IwiieKWOgFQOVVe2yXgKBpe/wZw="
+  [mod."github.com/russross/blackfriday"]
+    version = "v1.6.0"
+    hash = "sha256-tyqVArfv2d9sKGaG83SyZm//5QxLtGp1+qLgaz0SwAw="
   [mod."github.com/tailscale/certstore"]
     version = "v0.1.1-0.20220316223106-78d6e1c49d8d"
     hash = "sha256-qBlCkpHp8t+XNwMOJRO+YpvXn0nOJMABjUZKH70b/Y0="

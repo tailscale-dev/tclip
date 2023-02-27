@@ -12,11 +12,19 @@
 
 <p>Created at {{.CreatedAt}}</p>
 
+{{if .RawHTML}}
+<article>
+{{.RawHTML}}
+</article>
+<br />
+{{else}}
 <div style="display:inline-block;">
 <pre><code class="{{.CSSClass}}">{{.Data}}
 </code></pre>
 </div>
+<br />
+{{end}}
 
-<a href="/paste/{{.ID}}">Permalink</a> - <a href="/paste/{{.ID}}/dl">Download</a> - <a href="/paste/{{.ID}}/raw">Raw</a>{{if eq .UserID .PasterUserID}} - <a href="/api/delete/{{.ID}}">Delete</a>{{end}}
+<a href="/paste/{{.ID}}">Permalink</a> - <a href="/paste/{{.ID}}/dl">Download</a> - <a href="/paste/{{.ID}}/raw">Raw</a>{{if .RawHTML}} - <a href="/paste/{{.ID}}/md">Fancy</a>{{end}}{{if eq .UserID .PasterUserID}} - <a href="/api/delete/{{.ID}}">Delete</a>{{end}}
 
 {{template "footer" .}}

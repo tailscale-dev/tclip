@@ -22,7 +22,9 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ gomod2nix.overlays.default ];
+          overlays = [ gomod2nix.overlays.default (final: prev: {
+            go = prev.go_1_20;
+          }) ];
         };
         version = builtins.substring 0 8 self.lastModifiedDate;
       in {
