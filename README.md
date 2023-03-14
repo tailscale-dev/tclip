@@ -51,8 +51,6 @@ Your authkey should start with `tskey-auth`.
 
 You will need to have Magic DNS enabled.
 
-You will need to have 
-
 ### fly.io
 
 In one of your infrastructure management GitHub repositories, create a
