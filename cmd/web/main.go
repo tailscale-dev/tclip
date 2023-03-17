@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/md5"
-	"crypto/tls"
 	"database/sql"
 	"database/sql/driver"
 	"embed"
@@ -34,7 +33,8 @@ import (
 var (
 	hostname        = flag.String("hostname", envOr("TSNET_HOSTNAME", "paste"), "hostname to use on your tailnet, TSNET_HOSTNAME in the environment")
 	dataDir         = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
-	tsnetLogVerbose = flag.Bool("tsnet-verbose", os.Getenv("TSNET_VERBOSE") != "", "if set, have tsnet log verbosely to standard error")
+	tsnetLogVerbose = flag.Bool("tsnet-verbose", hasEnv("TSNET_VERBOSE"), "if set, have tsnet log verbosely to standard error")
+	useFunnel       = flag.Bool("use-funnel", hasEnv("USE_FUNNEL"), "if set, expose individual pastes to the public internet with Funnel, USE_FUNNEL in the environment")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -45,6 +45,11 @@ var (
 	//go:embed tmpl/*.tmpl
 	templateFiles embed.FS
 )
+
+func hasEnv(name string) bool {
+	_, ok := os.LookupEnv(name)
+	return ok
+}
 
 const formDataLimit = 64 * 1024 // 64 kilobytes (approx. 32 printed pages of text)
 
@@ -670,14 +675,22 @@ func main() {
 	log.Printf("listening on http://%s", *hostname)
 	go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
 
-	l443, err := s.Listen("tcp", ":443")
+	if *useFunnel {
+		log.Println("trying to listen on funnel")
+		ln, err := s.ListenFunnel("tcp", ":443", tsnet.FunnelOnly())
+		if err != nil {
+			log.Fatalf("can't listen on funnel: %v", err)
+		}
+		defer ln.Close()
+
+		go func() { log.Fatal(http.Serve(ln, funnelMux)) }()
+	}
+
+	l443, err := s.ListenTLS("tcp", ":443")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer l443.Close()
-	l443 = tls.NewListener(l443, &tls.Config{
-		GetCertificate: lc.GetCertificate,
-	})
 	log.Printf("listening on https://%s", httpsURL)
 	log.Fatal(http.Serve(l443, tailnetMux))
 }
