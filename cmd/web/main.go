@@ -452,6 +452,14 @@ func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
 		up = ui.UserProfile
 	}
 
+	if valAny := r.Context().Value(privacyKey); valAny != nil {
+		if val, ok := valAny.(mixedCriticalityHandlerCtxKey); ok {
+			if val == isFunnel {
+				up = nil
+			}
+		}
+	}
+
 	if r.Method != http.MethodGet {
 		http.Error(w, "must GET", http.StatusMethodNotAllowed)
 		return
@@ -492,7 +500,7 @@ WHERE p.id = ?1`
 	}
 
 	lang, safe := enry.GetLanguageByFilename(fname)
-	if !safe {
+	if lang == "" || !safe {
 		lang, _ = enry.GetLanguageByContent(fname, []byte(data))
 	}
 
@@ -571,6 +579,11 @@ WHERE p.id = ?1`
 		}
 	}
 
+	var remoteUserID = tailcfg.UserID(0)
+	if up != nil {
+		remoteUserID = up.ID
+	}
+
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
 		UserInfo            *tailcfg.UserProfile
 		Title               string
@@ -590,7 +603,7 @@ WHERE p.id = ?1`
 		PasterDisplayName:   userDisplayName,
 		PasterProfilePicURL: userProfilePicURL,
 		PasterUserID:        userID,
-		UserID:              int64(up.ID),
+		UserID:              int64(remoteUserID),
 		ID:                  id,
 		Data:                data,
 		RawHTML:             rawHTML,
@@ -686,6 +699,7 @@ func main() {
 		}
 		defer ln.Close()
 
+		log.Printf("listening on https://%s", httpsURL)
 		log.Fatal(MixedCriticalityHandler{
 			Public:  funnelMux,
 			Private: tailnetMux,
