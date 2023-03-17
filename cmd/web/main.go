@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/md5"
+	"crypto/tls"
 	"database/sql"
 	"database/sql/driver"
 	"embed"
@@ -11,6 +12,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -26,6 +28,7 @@ import (
 	"github.com/tailscale/sqlite"
 	"tailscale.com/client/tailscale"
 	"tailscale.com/client/tailscale/apitype"
+	"tailscale.com/ipn"
 	"tailscale.com/tailcfg"
 	"tailscale.com/tsnet"
 )
@@ -677,22 +680,82 @@ func main() {
 
 	if *useFunnel {
 		log.Println("trying to listen on funnel")
-		ln, err := s.ListenFunnel("tcp", ":443", tsnet.FunnelOnly())
+		ln, err := s.ListenFunnel("tcp", ":443")
 		if err != nil {
 			log.Fatalf("can't listen on funnel: %v", err)
 		}
 		defer ln.Close()
 
-		go func() { log.Fatal(http.Serve(ln, funnelMux)) }()
+		log.Fatal(MixedCriticalityHandler{
+			Public:  funnelMux,
+			Private: tailnetMux,
+		}.Serve(ln))
+	} else {
+		ln, err := s.ListenTLS("tcp", ":443")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer ln.Close()
+		log.Printf("listening on https://%s", httpsURL)
+		log.Fatal(http.Serve(ln, tailnetMux))
+	}
+}
+
+type mixedCriticalityHandlerCtxKey int
+
+const (
+	privacyKey mixedCriticalityHandlerCtxKey = iota
+	isFunnel
+	isTailnet
+)
+
+type MixedCriticalityHandler struct {
+	Public  http.Handler
+	Private http.Handler
+}
+
+func (mch MixedCriticalityHandler) Serve(ln net.Listener) error {
+	srv := &http.Server{
+		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
+			tc, ok := c.(*tls.Conn)
+			if !ok {
+				return ctx
+			}
+			if _, ok := tc.NetConn().(*ipn.FunnelConn); ok {
+				return context.WithValue(ctx, privacyKey, isFunnel)
+			} else {
+				return context.WithValue(ctx, privacyKey, isTailnet)
+			}
+		},
+		Handler: mch,
 	}
 
-	l443, err := s.ListenTLS("tcp", ":443")
-	if err != nil {
-		log.Fatal(err)
+	return srv.Serve(ln)
+}
+
+func (mch MixedCriticalityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	valAny := ctx.Value(privacyKey)
+	if valAny == nil {
+		panic("incorrect context stack (value is missing)")
 	}
-	defer l443.Close()
-	log.Printf("listening on https://%s", httpsURL)
-	log.Fatal(http.Serve(l443, tailnetMux))
+
+	val, ok := valAny.(mixedCriticalityHandlerCtxKey)
+	if !ok {
+		panic("incorrect context stack (value is of wrong type)")
+	}
+
+	switch val {
+	case isFunnel:
+		mch.Public.ServeHTTP(w, r)
+		return
+	case isTailnet:
+		mch.Private.ServeHTTP(w, r)
+		return
+	}
+
+	panic("unknown security level")
 }
 
 func openDB(dir string) (*sql.DB, error) {
