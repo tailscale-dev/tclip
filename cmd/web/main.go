@@ -10,16 +10,20 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
+	"github.com/go-enry/go-enry/v2"
 	"github.com/google/uuid"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/russross/blackfriday"
 	"github.com/tailscale/sqlite"
 	"tailscale.com/client/tailscale"
 	"tailscale.com/client/tailscale/apitype"
@@ -81,12 +85,47 @@ func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	q := `
+SELECT p.id
+     , p.filename
+     , p.created_at
+     , u.display_name
+FROM pastes p
+INNER JOIN users u
+  ON p.user_id = u.id
+ORDER BY p.rowid DESC
+LIMIT 5
+`
+
+	jpis := make([]JoinedPasteInfo, 0, 5)
+
+	rows, err := s.db.QueryContext(r.Context(), q)
+	if err != nil {
+		s.ShowError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		jpi := JoinedPasteInfo{}
+
+		err := rows.Scan(&jpi.ID, &jpi.Filename, &jpi.CreatedAt, &jpi.PasterDisplayName)
+		if err != nil {
+			s.ShowError(w, r, err, http.StatusInternalServerError)
+			return
+		}
+
+		jpis = append(jpis, jpi)
+	}
+
 	err = s.tmpls.ExecuteTemplate(w, "create.tmpl", struct {
-		UserInfo *tailcfg.UserProfile
-		Title    string
+		UserInfo     *tailcfg.UserProfile
+		Title        string
+		RecentPastes []JoinedPasteInfo
 	}{
-		UserInfo: ui.UserProfile,
-		Title:    "Create new paste",
+		UserInfo:     ui.UserProfile,
+		Title:        "Create new paste",
+		RecentPastes: jpis,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
@@ -208,9 +247,16 @@ VALUES
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "https://%s/paste/%s", s.httpsURL, id)
 	default:
-		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusCreated)
+		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
 	}
 
+}
+
+type JoinedPasteInfo struct {
+	ID                string `json:"id"`
+	Filename          string `json:"fname"`
+	CreatedAt         string `json:"created_at"`
+	PasterDisplayName string `json:"created_by"`
 }
 
 func (s *Server) TailnetPasteIndex(w http.ResponseWriter, r *http.Request) {
@@ -221,13 +267,6 @@ func (s *Server) TailnetPasteIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = userInfo
-
-	type JoinedPasteInfo struct {
-		ID                string `json:"id"`
-		Filename          string `json:"fname"`
-		CreatedAt         string `json:"created_at"`
-		PasterDisplayName string `json:"created_by"`
-	}
 
 	q := `
 SELECT p.id
@@ -410,15 +449,15 @@ func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sp := strings.Split(r.URL.Path, "/")
-	sp = sp[2:]
+	pathComponents := strings.Split(r.URL.Path, "/")
+	pathComponents = pathComponents[2:]
 
-	if len(sp) == 0 {
+	if len(pathComponents) == 0 {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
-	id := sp[0]
+	id := pathComponents[0]
 
 	q := `
 SELECT p.filename
@@ -444,8 +483,36 @@ WHERE p.id = ?1`
 		return
 	}
 
-	if len(sp) != 1 {
-		switch sp[1] {
+	lang, safe := enry.GetLanguageByFilename(fname)
+	if !safe {
+		lang, _ = enry.GetLanguageByContent(fname, []byte(data))
+	}
+
+	var rawHTML *template.HTML
+
+	// XXX(Xe): HACK around https://github.com/go-enry/go-enry/pull/154
+	if filepath.Ext(fname) == ".markdown" {
+		lang = "Markdown"
+	}
+
+	var cssClass string
+	if lang != "" {
+		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
+	}
+
+	if lang == "Markdown" {
+		output := blackfriday.MarkdownCommon([]byte(data))
+		p := bluemonday.UGCPolicy()
+		p.AllowAttrs("class").Matching(regexp.MustCompile("^language-[a-zA-Z0-9]+$")).OnElements("code")
+		sanitized := p.SanitizeBytes(output)
+		raw := template.HTML(string(sanitized))
+		rawHTML = &raw
+	}
+
+	// If you specify a formatting option:
+	if len(pathComponents) != 1 {
+		switch pathComponents[1] {
+		// view file as plain text in browser
 		case "raw":
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
@@ -453,6 +520,7 @@ WHERE p.id = ?1`
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, data)
 			return
+		// download file to disk (plain text view plus download hint)
 		case "dl":
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fname))
@@ -462,6 +530,36 @@ WHERE p.id = ?1`
 			fmt.Fprint(w, data)
 			return
 		case "":
+		// view markdown file with a fancy HTML rendering step
+		case "md":
+			if lang != "Markdown" {
+				http.Redirect(w, r, "/paste/"+id, http.StatusTemporaryRedirect)
+				return
+			}
+
+			title, ok := strings.CutPrefix(strings.Split(strings.TrimSpace(data), "\n")[0], "#")
+			if !ok {
+				title = fname
+			}
+
+			err = s.tmpls.ExecuteTemplate(w, "fancypost.tmpl", struct {
+				Title               string
+				CreatedAt           string
+				PasterDisplayName   string
+				PasterProfilePicURL string
+				RawHTML             *template.HTML
+			}{
+				Title:               title,
+				CreatedAt:           createdAt,
+				PasterDisplayName:   userDisplayName,
+				PasterProfilePicURL: userProfilePicURL,
+				RawHTML:             rawHTML,
+			})
+			if err != nil {
+				log.Printf("%s: %v", r.RemoteAddr, err)
+			}
+			return
+		// otherwise, throw a 404
 		default:
 			s.NotFound(w, r)
 			return
@@ -478,6 +576,8 @@ WHERE p.id = ?1`
 		UserID              int64
 		ID                  string
 		Data                string
+		RawHTML             *template.HTML
+		CSSClass            string
 	}{
 		UserInfo:            up,
 		Title:               fname,
@@ -488,6 +588,8 @@ WHERE p.id = ?1`
 		UserID:              int64(up.ID),
 		ID:                  id,
 		Data:                data,
+		RawHTML:             rawHTML,
+		CSSClass:            cssClass,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)

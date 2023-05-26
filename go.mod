@@ -3,7 +3,10 @@ module github.com/tailscale-dev/tclip
 go 1.19
 
 require (
+	github.com/go-enry/go-enry/v2 v2.8.3
 	github.com/google/uuid v1.3.0
+	github.com/microcosm-cc/bluemonday v1.0.22
+	github.com/russross/blackfriday v1.6.0
 	github.com/tailscale/sqlite v0.0.0-20221025150348-0716cf4a392b
 	tailscale.com v1.34.0
 )
@@ -25,13 +28,16 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.6.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.11.1 // indirect
 	github.com/aws/smithy-go v1.9.0 // indirect
+	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/coreos/go-iptables v0.6.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
+	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20220222234857-c00d1f31bab3 // indirect
 	github.com/illarion/gonotify v1.0.1 // indirect
 	github.com/insomniacslk/dhcp v0.0.0-20211209223715-7d93572ebe8e // indirect
