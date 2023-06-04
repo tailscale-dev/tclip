@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -27,6 +28,7 @@ import (
 	"github.com/tailscale/sqlite"
 	"tailscale.com/client/tailscale"
 	"tailscale.com/client/tailscale/apitype"
+	"tailscale.com/ipn"
 	"tailscale.com/tailcfg"
 	"tailscale.com/tsnet"
 )
@@ -34,7 +36,8 @@ import (
 var (
 	hostname        = flag.String("hostname", envOr("TSNET_HOSTNAME", "paste"), "hostname to use on your tailnet, TSNET_HOSTNAME in the environment")
 	dataDir         = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
-	tsnetLogVerbose = flag.Bool("tsnet-verbose", os.Getenv("TSNET_VERBOSE") != "", "if set, have tsnet log verbosely to standard error")
+	tsnetLogVerbose = flag.Bool("tsnet-verbose", hasEnv("TSNET_VERBOSE"), "if set, have tsnet log verbosely to standard error")
+	useFunnel       = flag.Bool("use-funnel", hasEnv("USE_FUNNEL"), "if set, expose individual pastes to the public internet with Funnel, USE_FUNNEL in the environment")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -45,6 +48,11 @@ var (
 	//go:embed tmpl/*.tmpl
 	templateFiles embed.FS
 )
+
+func hasEnv(name string) bool {
+	_, ok := os.LookupEnv(name)
+	return ok
+}
 
 const formDataLimit = 64 * 1024 // 64 kilobytes (approx. 32 printed pages of text)
 
@@ -444,6 +452,14 @@ func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
 		up = ui.UserProfile
 	}
 
+	if valAny := r.Context().Value(privacyKey); valAny != nil {
+		if val, ok := valAny.(mixedCriticalityHandlerCtxKey); ok {
+			if val == isFunnel {
+				up = nil
+			}
+		}
+	}
+
 	if r.Method != http.MethodGet {
 		http.Error(w, "must GET", http.StatusMethodNotAllowed)
 		return
@@ -484,7 +500,7 @@ WHERE p.id = ?1`
 	}
 
 	lang, safe := enry.GetLanguageByFilename(fname)
-	if !safe {
+	if lang == "" || !safe {
 		lang, _ = enry.GetLanguageByContent(fname, []byte(data))
 	}
 
@@ -563,6 +579,11 @@ WHERE p.id = ?1`
 		}
 	}
 
+	var remoteUserID = tailcfg.UserID(0)
+	if up != nil {
+		remoteUserID = up.ID
+	}
+
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
 		UserInfo            *tailcfg.UserProfile
 		Title               string
@@ -582,7 +603,7 @@ WHERE p.id = ?1`
 		PasterDisplayName:   userDisplayName,
 		PasterProfilePicURL: userProfilePicURL,
 		PasterUserID:        userID,
-		UserID:              int64(up.ID),
+		UserID:              int64(remoteUserID),
 		ID:                  id,
 		Data:                data,
 		RawHTML:             rawHTML,
@@ -670,16 +691,85 @@ func main() {
 	log.Printf("listening on http://%s", *hostname)
 	go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
 
-	l443, err := s.Listen("tcp", ":443")
-	if err != nil {
-		log.Fatal(err)
+	if *useFunnel {
+		log.Println("trying to listen on funnel")
+		ln, err := s.ListenFunnel("tcp", ":443")
+		if err != nil {
+			log.Fatalf("can't listen on funnel: %v", err)
+		}
+		defer ln.Close()
+
+		log.Printf("listening on https://%s", httpsURL)
+		log.Fatal(MixedCriticalityHandler{
+			Public:  funnelMux,
+			Private: tailnetMux,
+		}.Serve(ln))
+	} else {
+		ln, err := s.ListenTLS("tcp", ":443")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer ln.Close()
+		log.Printf("listening on https://%s", httpsURL)
+		log.Fatal(http.Serve(ln, tailnetMux))
 	}
-	defer l443.Close()
-	l443 = tls.NewListener(l443, &tls.Config{
-		GetCertificate: lc.GetCertificate,
-	})
-	log.Printf("listening on https://%s", httpsURL)
-	log.Fatal(http.Serve(l443, tailnetMux))
+}
+
+type mixedCriticalityHandlerCtxKey int
+
+const (
+	privacyKey mixedCriticalityHandlerCtxKey = iota
+	isFunnel
+	isTailnet
+)
+
+type MixedCriticalityHandler struct {
+	Public  http.Handler
+	Private http.Handler
+}
+
+func (mch MixedCriticalityHandler) Serve(ln net.Listener) error {
+	srv := &http.Server{
+		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
+			tc, ok := c.(*tls.Conn)
+			if !ok {
+				return ctx
+			}
+			if _, ok := tc.NetConn().(*ipn.FunnelConn); ok {
+				return context.WithValue(ctx, privacyKey, isFunnel)
+			} else {
+				return context.WithValue(ctx, privacyKey, isTailnet)
+			}
+		},
+		Handler: mch,
+	}
+
+	return srv.Serve(ln)
+}
+
+func (mch MixedCriticalityHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	valAny := ctx.Value(privacyKey)
+	if valAny == nil {
+		panic("incorrect context stack (value is missing)")
+	}
+
+	val, ok := valAny.(mixedCriticalityHandlerCtxKey)
+	if !ok {
+		panic("incorrect context stack (value is of wrong type)")
+	}
+
+	switch val {
+	case isFunnel:
+		mch.Public.ServeHTTP(w, r)
+		return
+	case isTailnet:
+		mch.Private.ServeHTTP(w, r)
+		return
+	}
+
+	panic("unknown security level")
 }
 
 func openDB(dir string) (*sql.DB, error) {
