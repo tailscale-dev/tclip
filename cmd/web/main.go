@@ -544,6 +544,8 @@ WHERE p.id = ?1`
 
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, data)
+			return
+		case "":
 		// view markdown file with a fancy HTML rendering step
 		case "md":
 			if lang != "Markdown" {
@@ -576,6 +578,7 @@ WHERE p.id = ?1`
 		// otherwise, throw a 404
 		default:
 			s.NotFound(w, r)
+			return
 		}
 	}
 
