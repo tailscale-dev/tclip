@@ -1,11 +1,11 @@
 [Unit]
-Description=The Infinipaste service
-Documentation=https://github.com/tailscale-dev/infinipaste
+Description=The tclip service
+Documentation=https://github.com/tailscale-dev/tclip
 
 [Service]
 DynamicUser=yes
-StateDirectory=infinipaste
-Environment=DATA_DIR=/var/lib/private/infinipaste/data
+StateDirectory=tclip
+Environment=DATA_DIR=/var/lib/private/tclip/data
 ExecStart=@web@/bin/web
 Restart=always
 RestartSec=30s
