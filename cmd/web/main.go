@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
 	"crypto/tls"
@@ -23,6 +24,7 @@ import (
 	"github.com/go-enry/go-enry/v2"
 	"github.com/google/uuid"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/niklasfasching/go-org/org"
 	"github.com/russross/blackfriday"
 	_ "modernc.org/sqlite"
 	"tailscale.com/client/tailscale"
@@ -509,18 +511,45 @@ WHERE p.id = ?1`
 		lang = "Markdown"
 	}
 
+	// For whatever reason go-enry can't correctly match org files?
+	if filepath.Ext(fname) == ".org" {
+		lang = "Org"
+	}
+
 	var cssClass string
 	if lang != "" {
 		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
 	}
 
+	p := bluemonday.UGCPolicy()
+	p.AllowAttrs("class").Matching(regexp.MustCompile("^language-[a-zA-Z0-9]+$")).OnElements("code")
+
 	if lang == "Markdown" {
 		output := blackfriday.MarkdownCommon([]byte(data))
-		p := bluemonday.UGCPolicy()
-		p.AllowAttrs("class").Matching(regexp.MustCompile("^language-[a-zA-Z0-9]+$")).OnElements("code")
 		sanitized := p.SanitizeBytes(output)
 		raw := template.HTML(string(sanitized))
 		rawHTML = &raw
+	}
+
+	if lang == "Org" {
+		w := org.NewHTMLWriter()
+		w.HighlightCodeBlock = func(source, lang string, inline bool, params map[string]string) string {
+			sourceSanitized := p.SanitizeBytes([]byte(source))
+			if inline {
+				return fmt.Sprintf("<code>%s</code>", sourceSanitized)
+
+			}
+			return fmt.Sprintf("<pre class=\"language-%[1]s\"><code class=\"language-%[1]s\">%s</code></pre>", lang, sourceSanitized)
+		}
+		output, err := org.New().Parse(bytes.NewReader([]byte(data)), "").Write(w)
+		// If we fail parsing just fall back to text and log.
+		if err == nil {
+			sanitized := p.SanitizeBytes([]byte(output))
+			raw := template.HTML(string(sanitized))
+			rawHTML = &raw
+		} else {
+			log.Printf("error parsing org file: %s", err)
+		}
 	}
 
 	// If you specify a formatting option:
@@ -545,15 +574,24 @@ WHERE p.id = ?1`
 			return
 		case "":
 		// view markdown file with a fancy HTML rendering step
-		case "md":
-			if lang != "Markdown" {
+		case "md", "org":
+			if lang != "Markdown" && lang != "Org" {
 				http.Redirect(w, r, "/paste/"+id, http.StatusTemporaryRedirect)
 				return
 			}
 
-			title, ok := strings.CutPrefix(strings.Split(strings.TrimSpace(data), "\n")[0], "#")
-			if !ok {
-				title = fname
+			title := fname
+			if lang == "Markdown" {
+				mdTitle, ok := strings.CutPrefix(strings.Split(strings.TrimSpace(data), "\n")[0], "#")
+				if ok {
+					title = mdTitle
+				}
+			}
+			if lang == "Org" {
+				ogTitle, ok := strings.CutPrefix(strings.Split(strings.TrimSpace(data), "\n")[0], "#+title:")
+				if ok {
+					title = ogTitle
+				}
 			}
 
 			err = s.tmpls.ExecuteTemplate(w, "fancypost.html", struct {
