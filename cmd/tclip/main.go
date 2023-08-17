@@ -13,13 +13,13 @@ import (
 )
 
 var (
-	fname = flag.String("n", "", "filename to use for pastes from standard input")
-	target = flag.String("target", "http://paste", "infinipaste server URL")
+	fname  = flag.String("n", "", "filename to use for pastes from standard input")
+	target = flag.String("target", "http://paste", "tclip server URL")
 )
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [filename]\n\nTakes a file or standard in and posts it to your tailnet's infinipaste service. Returns a URL on standard out for sharing.\n\nFlags:\n", filepath.Base(os.Args[0]))
+		fmt.Fprintf(os.Stderr, "Usage: %s [filename]\n\nTakes a file or standard in and posts it to your tailnet's tclip service. Returns a URL on standard out for sharing.\n\nFlags:\n", filepath.Base(os.Args[0]))
 		flag.PrintDefaults()
 		os.Exit(2)
 	}
