@@ -14,6 +14,10 @@ number of pastes.
 You can then test your changes to tclip by running `go run
 ./cmd/web` or `go run ./cmd/tclip` as appropriate.
 
+Note that for the first run of `./cmd/web`, you *must* set
+either the `TS_AUTHKEY` environment variable, or run it with
+`--tsnet-verbose` to get the login URL for Tailscale.
+
 ## Building for prod
 
 The web server:
