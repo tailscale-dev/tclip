@@ -499,9 +499,12 @@ WHERE p.id = ?1`
 		return
 	}
 
-	lang, safe := enry.GetLanguageByFilename(fname)
+	lang, safe := enry.GetLanguageByExtension(fname)
 	if lang == "" || !safe {
-		lang, _ = enry.GetLanguageByContent(fname, []byte(data))
+		lang, safe = enry.GetLanguageByFilename(fname)
+		if lang == "" || !safe {
+			lang, _ = enry.GetLanguageByContent(fname, []byte(data))
+		}
 	}
 
 	var rawHTML *template.HTML
