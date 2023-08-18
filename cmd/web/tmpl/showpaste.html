@@ -4,10 +4,10 @@
 
 {{if .UserInfo}}
 {{if ne .PasterUserID .UserID}}
-<div class="float-right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+<div class="right">{{.PasterDisplayName}} {{if .PasterProfilePicURL}}<img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" />{{end}}</div>
 {{end}}
 {{else}}
-<div class="float-right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+<div class="right">{{.PasterDisplayName}} {{if .PasterProfilePicURL}}<img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" />{{end}}</div>
 {{end}}
 
 <p>Created at {{.CreatedAt}}</p>
