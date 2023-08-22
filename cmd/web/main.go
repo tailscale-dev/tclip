@@ -499,13 +499,7 @@ WHERE p.id = ?1`
 		return
 	}
 
-	lang, safe := enry.GetLanguageByExtension(fname)
-	if lang == "" || !safe {
-		lang, safe = enry.GetLanguageByFilename(fname)
-		if lang == "" || !safe {
-			lang, _ = enry.GetLanguageByContent(fname, []byte(data))
-		}
-	}
+	lang := enry.GetLanguage(fname, []byte(data))
 
 	var rawHTML *template.HTML
 
