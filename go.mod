@@ -3,7 +3,7 @@ module github.com/tailscale-dev/tclip
 go 1.19
 
 require (
-	github.com/go-enry/go-enry/v2 v2.8.3
+	github.com/go-enry/go-enry/v2 v2.8.4
 	github.com/google/uuid v1.3.0
 	github.com/microcosm-cc/bluemonday v1.0.22
 	github.com/russross/blackfriday v1.6.0

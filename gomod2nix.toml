@@ -59,8 +59,8 @@ schema = 3
     version = "v2.4.0"
     hash = "sha256-LwOrfDN5fx/R2lgaD90RIu2NxcJDpyqYEURLc9Kgxgw="
   [mod."github.com/go-enry/go-enry/v2"]
-    version = "v2.8.3"
-    hash = "sha256-xVkCSN3Bj1PgLy/Zb5XYYBnOUFKgKsLfAARlPDHe+kA="
+    version = "v2.8.4"
+    hash = "sha256-IzfYtlfOKsvvlej7OI2KEsWWqP3xFk/oB8scZ5OyiNA="
   [mod."github.com/go-enry/go-oniguruma"]
     version = "v1.2.1"
     hash = "sha256-DoCNyX75CuCgFnfSZs63VB4+HAIMDBgwcQglXXHRj/I="
