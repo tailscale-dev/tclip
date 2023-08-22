@@ -1,8 +1,8 @@
 {{template "header" .}}
 
-<ul>
+<ul class="list-disc ml-5">
     {{range .Pastes}}
-    <li><a href="/paste/{{.ID}}">{{.Filename}}</a> - {{.CreatedAt}} - {{.PasterDisplayName}}</li>
+    <li><a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}">{{.Filename}}</a> - {{.CreatedAt}} - {{.PasterDisplayName}}</li>
     {{end}}
 </ul>
 

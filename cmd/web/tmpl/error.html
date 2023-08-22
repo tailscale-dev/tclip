@@ -1,0 +1,10 @@
+{{template "header" .}}
+<p class="my-4 max-w-lg">Oh noes! There was an error when trying to do this thing:</p>
+
+<code><pre class="p-4 bg-gray-100 text-gray-900">
+{{.Error}}
+</code></pre>
+
+<p class="my-4 max-w-lg">This is almost certainly not what was anticipated, and if you think you are seeing this in error, please contact your administrator or Tailscale support for help with the program itself.</p>
+</div>
+{{template "footer" .}}

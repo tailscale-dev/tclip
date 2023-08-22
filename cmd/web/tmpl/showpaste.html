@@ -1,0 +1,29 @@
+{{template "header" .}}
+
+<script src="/static/js/prism.js"></script>
+
+{{if .UserInfo}}
+{{if ne .PasterUserID .UserID}}
+<div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+{{end}}
+{{else}}
+<div class="right">{{.PasterDisplayName}} <img style="width:32px;height:32px" src="{{.PasterProfilePicURL}}" /></div>
+{{end}}
+
+<p>Created at {{.CreatedAt}}</p>
+
+{{if .RawHTML}}
+<article class="my-6 prose">
+{{.RawHTML}}
+</article>
+{{else}}
+<div style="display:inline-block;">
+<pre><code class="my-6 max-w-full {{.CSSClass}}">{{.Data}}
+</code></pre>
+</div>
+<br />
+{{end}}
+
+<a class="my-4 font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}">Permalink</a> - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}/dl">Download</a> - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}/raw">Raw</a>{{if .RawHTML}} - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}/md">Fancy</a>{{end}}{{if eq .UserID .PasterUserID}} - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/api/delete/{{.ID}}">Delete</a>{{end}}
+
+{{template "footer" .}}
