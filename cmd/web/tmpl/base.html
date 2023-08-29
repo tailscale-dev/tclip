@@ -14,8 +14,8 @@
                 <h1 class="text-2xl font-bold pb-1"><a href="/">tclip/</a></h1>
                 A private pastebin for your tailnet
                 <nav>
-                    {{if .UserInfo}} - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/list">List</a> - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/help">Help</a>{{end}}
-                    {{if .UserInfo}}<div class="float-right">{{.UserInfo.DisplayName}} <img class="w-8 p-8 rounded-xl" src="{{.UserInfo.ProfilePicURL}}" /></div>{{end}}
+                    {{if .UserInfo}}<a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/list">List</a> - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/help">Help</a>{{end}}
+                    {{if .UserInfo}}<div class="float-right">{{.UserInfo.DisplayName}} {{if ne .UserInfo.ProfilePicURL ""}} <img class="w-8 p-8 rounded-xl" src="{{.UserInfo.ProfilePicURL}}" /></div>{{end}}{{end}}
                 </nav>
             </header>
         </div>
