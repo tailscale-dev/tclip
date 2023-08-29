@@ -45,7 +45,7 @@ var (
 	//go:embed static
 	staticFiles embed.FS
 
-	//go:embed tmpl/*.tmpl
+	//go:embed tmpl/*.html
 	templateFiles embed.FS
 )
 
@@ -126,7 +126,7 @@ LIMIT 5
 		jpis = append(jpis, jpi)
 	}
 
-	err = s.tmpls.ExecuteTemplate(w, "create.tmpl", struct {
+	err = s.tmpls.ExecuteTemplate(w, "create.html", struct {
 		UserInfo     *tailcfg.UserProfile
 		Title        string
 		RecentPastes []JoinedPasteInfo
@@ -147,7 +147,7 @@ func (s *Server) TailnetHelp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.tmpls.ExecuteTemplate(w, "help.tmpl", struct {
+	err = s.tmpls.ExecuteTemplate(w, "help.html", struct {
 		UserInfo *tailcfg.UserProfile
 		Title    string
 	}{
@@ -160,7 +160,7 @@ func (s *Server) TailnetHelp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) NotFound(w http.ResponseWriter, r *http.Request) {
-	s.tmpls.ExecuteTemplate(w, "notfound.tmpl", struct {
+	s.tmpls.ExecuteTemplate(w, "notfound.html", struct {
 		UserInfo *tailcfg.UserProfile
 		Title    string
 	}{
@@ -175,7 +175,7 @@ func (s *Server) PublicIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.tmpls.ExecuteTemplate(w, "publicindex.tmpl", struct {
+	s.tmpls.ExecuteTemplate(w, "publicindex.html", struct {
 		UserInfo *tailcfg.UserProfile
 		Title    string
 	}{
@@ -323,7 +323,7 @@ OFFSET ?1
 	}
 
 	if len(jpis) == 0 {
-		err = s.tmpls.ExecuteTemplate(w, "nopastes.tmpl", struct {
+		err = s.tmpls.ExecuteTemplate(w, "nopastes.html", struct {
 			UserInfo *tailcfg.UserProfile
 			Title    string
 		}{
@@ -347,7 +347,7 @@ OFFSET ?1
 		next = &i
 	}
 
-	err = s.tmpls.ExecuteTemplate(w, "listpaste.tmpl", struct {
+	err = s.tmpls.ExecuteTemplate(w, "listpaste.html", struct {
 		UserInfo *tailcfg.UserProfile
 		Title    string
 		Pastes   []JoinedPasteInfo
@@ -373,7 +373,7 @@ func (s *Server) ShowError(w http.ResponseWriter, r *http.Request, err error, co
 
 	log.Printf("%s: %v", r.RemoteAddr, err)
 
-	if err := s.tmpls.ExecuteTemplate(w, "error.tmpl", struct {
+	if err := s.tmpls.ExecuteTemplate(w, "error.html", struct {
 		Title, Error string
 		UserInfo     any
 	}{
@@ -499,10 +499,7 @@ WHERE p.id = ?1`
 		return
 	}
 
-	lang, safe := enry.GetLanguageByFilename(fname)
-	if lang == "" || !safe {
-		lang, _ = enry.GetLanguageByContent(fname, []byte(data))
-	}
+	lang := enry.GetLanguage(fname, []byte(data))
 
 	var rawHTML *template.HTML
 
@@ -558,7 +555,7 @@ WHERE p.id = ?1`
 				title = fname
 			}
 
-			err = s.tmpls.ExecuteTemplate(w, "fancypost.tmpl", struct {
+			err = s.tmpls.ExecuteTemplate(w, "fancypost.html", struct {
 				Title               string
 				CreatedAt           string
 				PasterDisplayName   string
@@ -587,7 +584,7 @@ WHERE p.id = ?1`
 		remoteUserID = up.ID
 	}
 
-	err = s.tmpls.ExecuteTemplate(w, "showpaste.tmpl", struct {
+	err = s.tmpls.ExecuteTemplate(w, "showpaste.html", struct {
 		UserInfo            *tailcfg.UserProfile
 		Title               string
 		CreatedAt           string
@@ -664,7 +661,7 @@ func main() {
 	ctx := context.Background()
 	httpsURL, ok := lc.ExpandSNIName(ctx, *hostname)
 	if !ok {
-		log.Printf(httpsURL)
+		log.Println(httpsURL)
 		log.Fatal("HTTPS is not enabled in the admin panel")
 	}
 
@@ -673,7 +670,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.tmpl"))
+	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.html"))
 
 	srv := &Server{lc, db, tmpls, httpsURL}
 

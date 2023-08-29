@@ -84,6 +84,9 @@
             go-tools
             gomod2nix.packages.${system}.default
             sqlite-interactive
+
+            yarn
+            nodejs
           ];
 
           TSNET_HOSTNAME = "paste-devel";
