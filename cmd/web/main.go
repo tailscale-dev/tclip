@@ -48,6 +48,8 @@ var (
 	templateFiles embed.FS
 )
 
+const timeFormat = "2006-01-02 15:04"
+
 func hasEnv(name string) bool {
 	_, ok := os.LookupEnv(name)
 	return ok
@@ -237,7 +239,7 @@ VALUES
 		r.Context(),
 		q,
 		id,
-		time.Now(),
+		time.Now().Format(timeFormat),
 		userInfo.UserProfile.ID,
 		fname,
 		data,
