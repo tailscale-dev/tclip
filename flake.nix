@@ -8,7 +8,7 @@
     gomod2nix = {
       url = "github:tweag/gomod2nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.utils.follows = "utils";
+      inputs.flake-utils.follows = "utils";
     };
   };
 
@@ -20,10 +20,16 @@
       "aarch64-darwin"
     ] (system:
       let
+      graft = pkgs: pkg: pkg.override {
+        buildGoModule = pkgs.buildGo121Module;
+      };
         pkgs = import nixpkgs {
           inherit system;
           overlays = [ gomod2nix.overlays.default (final: prev: {
-            go = prev.go_1_20;
+            go = prev.go_1_21;
+            go-tools = graft prev prev.go-tools;
+            gotools = graft prev prev.gotools;
+            gopls = graft prev prev.gopls;
           }) ];
         };
         version = builtins.substring 0 8 self.lastModifiedDate;
@@ -32,6 +38,7 @@
           web = pkgs.buildGoApplication {
             pname = "tclip-web";
             version = "0.1.0-${version}";
+            go = pkgs.go_1_21;
             src = ./.;
             subPackages = "cmd/web";
             modules = ./gomod2nix.toml;
@@ -41,6 +48,7 @@
             pname = "tclip";
             inherit (web) src version modules;
             subPackages = "cmd/tclip";
+            go = pkgs.go_1_21;
 
             CGO_ENABLED = "0";
           };
