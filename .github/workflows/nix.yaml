@@ -17,7 +17,7 @@ jobs:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - name: "Basic CLI and web build"
       run: |
-        nix build .#tclip .#web
+        nix build .#tclip .#tclipd
     - name: "Docker image build"
       run: |
         nix build .#docker

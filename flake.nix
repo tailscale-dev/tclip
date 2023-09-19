@@ -35,18 +35,18 @@
         version = builtins.substring 0 8 self.lastModifiedDate;
       in {
         packages = rec {
-          web = pkgs.buildGoApplication {
-            pname = "tclip-web";
+          tclipd = pkgs.buildGoApplication {
+            pname = "tclipd";
             version = "0.1.0-${version}";
             go = pkgs.go_1_21;
             src = ./.;
-            subPackages = "cmd/web";
+            subPackages = "cmd/tclipd";
             modules = ./gomod2nix.toml;
           };
 
           tclip = pkgs.buildGoApplication {
             pname = "tclip";
-            inherit (web) src version modules;
+            inherit (tclipd) src version modules;
             subPackages = "cmd/tclip";
             go = pkgs.go_1_21;
 
@@ -56,7 +56,7 @@
           docker = pkgs.dockerTools.buildLayeredImage {
             name = "ghcr.io/tailscale-dev/tclip";
             tag = "latest";
-            config.Cmd = [ "${web}/bin/web" ];
+            config.Cmd = [ "${tclipd}/bin/tclipd" ];
             contents = [ pkgs.cacert ];
           };
 
@@ -64,10 +64,10 @@
             web-service = pkgs.substituteAll {
               name = "tclip.service";
               src = ./run/portable-service/tclip.service.in;
-              inherit web;
+              inherit tclipd;
             };
           in pkgs.portableService {
-            inherit (web) version;
+            inherit (tclipd) version;
             pname = "tclip";
             description = "The tclip service";
             homepage = "https://github.com/tailscale-dev/tclip";

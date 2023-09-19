@@ -6,7 +6,7 @@ Documentation=https://github.com/tailscale-dev/tclip
 DynamicUser=yes
 StateDirectory=tclip
 Environment=DATA_DIR=/var/lib/private/tclip/data
-ExecStart=@web@/bin/web
+ExecStart=@tclipd@/bin/tclipd
 Restart=always
 RestartSec=30s
 
