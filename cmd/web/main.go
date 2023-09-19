@@ -504,11 +504,6 @@ WHERE p.id = ?1`
 
 	var rawHTML *template.HTML
 
-	// XXX(Xe): HACK around https://github.com/go-enry/go-enry/pull/154
-	if filepath.Ext(fname) == ".markdown" {
-		lang = "Markdown"
-	}
-
 	var cssClass string
 	if lang != "" {
 		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
