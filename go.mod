@@ -6,6 +6,7 @@ require (
 	github.com/go-enry/go-enry/v2 v2.8.4
 	github.com/google/uuid v1.3.1
 	github.com/microcosm-cc/bluemonday v1.0.25
+	github.com/niklasfasching/go-org v1.7.0
 	github.com/russross/blackfriday v1.6.0
 	modernc.org/sqlite v1.25.0
 	tailscale.com v1.48.2
