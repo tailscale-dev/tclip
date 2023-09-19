@@ -55,6 +55,9 @@ schema = 3
   [mod."github.com/coreos/go-iptables"]
     version = "v0.6.0"
     hash = "sha256-hB+9XsybJuEFozAXo+G8+2qMMZGoqBbMmSwmcNJgmSU="
+  [mod."github.com/dustin/go-humanize"]
+    version = "v1.0.1"
+    hash = "sha256-yuvxYYngpfVkUg9yAmG99IUVmADTQA0tMbBXe0Fq0Mc="
   [mod."github.com/fxamacker/cbor/v2"]
     version = "v2.4.0"
     hash = "sha256-LwOrfDN5fx/R2lgaD90RIu2NxcJDpyqYEURLc9Kgxgw="
@@ -103,12 +106,18 @@ schema = 3
   [mod."github.com/jsimonetti/rtnetlink"]
     version = "v1.1.2-0.20220408201609-d380b505068b"
     hash = "sha256-xHfsLwbycxNNyFI9zTfSMsb2T35BKEWyW6Fmk1tDWM4="
+  [mod."github.com/kballard/go-shellquote"]
+    version = "v0.0.0-20180428030007-95032a82bc51"
+    hash = "sha256-AOEdKETBMUC39ln6jBJ9NYdJWp++jV5lSbjNqG3dV+c="
   [mod."github.com/klauspost/compress"]
     version = "v1.15.4"
     hash = "sha256-U6v9tYD16Tep9PuqRwCjrzXfj1IfV3KB54Qwnzko+xY="
   [mod."github.com/kortschak/wol"]
     version = "v0.0.0-20200729010619-da482cc4850a"
     hash = "sha256-lnr9r/KNv4EeeNohFImC3Vd5E9nJ0N+4ZZ0VHFjwHps="
+  [mod."github.com/mattn/go-isatty"]
+    version = "v0.0.16"
+    hash = "sha256-YMaPZvShDfA98vqw1+zWWl7M1IT4nHPGBrAt7kHo8Iw="
   [mod."github.com/mdlayher/genetlink"]
     version = "v1.2.0"
     hash = "sha256-7PGwKlBVkNsYZFErVsOzqmQ+tZnxqzpNd4LuzXjwNQU="
@@ -130,6 +139,9 @@ schema = 3
   [mod."github.com/pkg/errors"]
     version = "v0.9.1"
     hash = "sha256-mNfQtcrQmu3sNg/7IwiieKWOgFQOVVe2yXgKBpe/wZw="
+  [mod."github.com/remyoudompheng/bigfft"]
+    version = "v0.0.0-20230129092748-24d4a6f8daec"
+    hash = "sha256-vYmpyCE37eBYP/navhaLV4oX4/nu0Z/StAocLIFqrmM="
   [mod."github.com/russross/blackfriday"]
     version = "v1.6.0"
     hash = "sha256-tyqVArfv2d9sKGaG83SyZm//5QxLtGp1+qLgaz0SwAw="
@@ -145,9 +157,6 @@ schema = 3
   [mod."github.com/tailscale/netlink"]
     version = "v1.1.1-0.20211101221916-cabfb018fe85"
     hash = "sha256-bMK5qqObMcxIbPy5XhOZP8TGDaXvDAHsE0FR68VMLi8="
-  [mod."github.com/tailscale/sqlite"]
-    version = "v0.0.0-20221025150348-0716cf4a392b"
-    hash = "sha256-WqUhLogzGt8CF6CyiOfWRZz+AArxH8INJxda4qsTGQI="
   [mod."github.com/tailscale/wireguard-go"]
     version = "v0.0.0-20221219190806-4fa124729667"
     hash = "sha256-ds+3T5m9CDZNQXqxw0ECFoQhAbOrmw2TbqLc/jRVuJ0="
@@ -205,9 +214,6 @@ schema = 3
   [mod."golang.zx2c4.com/wintun"]
     version = "v0.0.0-20230126152724-0fa3db229ce2"
     hash = "sha256-cjMLNjKnnupVROWmeASORVieAL9ieYdzX3cFzG8bCpo="
-  [mod."golang.zx2c4.com/wireguard"]
-    version = "v0.0.0-20220920152132-bb719d3a6e2c"
-    hash = "sha256-AA/03ZNKL+yLUXptNidfAvjHrrYOncqXx8hND8PrAVM="
   [mod."golang.zx2c4.com/wireguard/windows"]
     version = "v0.5.3"
     hash = "sha256-wcJWS/4Fqbc+1RHSntex0zBdlHiZfzrea4QabYkNKvU="
@@ -217,6 +223,36 @@ schema = 3
   [mod."inet.af/peercred"]
     version = "v0.0.0-20210906144145-0893ea02156a"
     hash = "sha256-f0ws9PdTpRpX64asTol0O82IWYM9r8NhZgOCi2dPToo="
+  [mod."lukechampine.com/uint128"]
+    version = "v1.2.0"
+    hash = "sha256-gwpTC3V+1pxjzxZvCnum+qpaGD84WtHncywddTSPye4="
+  [mod."modernc.org/cc/v3"]
+    version = "v3.40.0"
+    hash = "sha256-s7KmY6n9S4JfP03mJ58OYJJYLLgL7iBcTf+uAqxR3rM="
+  [mod."modernc.org/ccgo/v3"]
+    version = "v3.16.13"
+    hash = "sha256-4bBUzkL+uXQ4Pe9BZjCj4PuJ8pR+8lC6+aQhC1z8iQw="
+  [mod."modernc.org/libc"]
+    version = "v1.24.1"
+    hash = "sha256-ncVRe3Mx5agBpEoAlEsZkWaVTKulHSZB9DMrWs+iisw="
+  [mod."modernc.org/mathutil"]
+    version = "v1.5.0"
+    hash = "sha256-5xM9HjjHf9sB0vLfN53PdGpT0qPF1+KI1/lgN0/4LQo="
+  [mod."modernc.org/memory"]
+    version = "v1.6.0"
+    hash = "sha256-XxRCHqhE+oD5UV0PQpwGpvqMUfOX9d59SRPcBwOaNGk="
+  [mod."modernc.org/opt"]
+    version = "v0.1.3"
+    hash = "sha256-7C/odVzq+jp8aP6zbwH2cp8r4fxZ3nfQ4Cz3p9cshHE="
+  [mod."modernc.org/sqlite"]
+    version = "v1.25.0"
+    hash = "sha256-+EghwLCPWp9xlr3JbU4izb5jXjVyAkSpsiPvQxKYxtA="
+  [mod."modernc.org/strutil"]
+    version = "v1.1.3"
+    hash = "sha256-uEGJcwaeeN7cy62v06HoRdHB1p14McdlPID8QGJQd4k="
+  [mod."modernc.org/token"]
+    version = "v1.0.1"
+    hash = "sha256-lTSZX8nrb5hDZqOnRuFmI4VIaco3qwwWe28z24vohyo="
   [mod."nhooyr.io/websocket"]
     version = "v1.8.7"
     hash = "sha256-6pQ35gFvbyMhNo0gv4bPxYDUrwDF/ok1GMA+BHfsRRM="

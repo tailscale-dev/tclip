@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"crypto/tls"
 	"database/sql"
-	"database/sql/driver"
 	"embed"
 	"errors"
 	"flag"
@@ -25,7 +24,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/russross/blackfriday"
-	"github.com/tailscale/sqlite"
+	_ "modernc.org/sqlite"
 	"tailscale.com/client/tailscale"
 	"tailscale.com/client/tailscale/apitype"
 	"tailscale.com/ipn"
@@ -773,12 +772,17 @@ func (mch MixedCriticalityHandler) ServeHTTP(w http.ResponseWriter, r *http.Requ
 }
 
 func openDB(dir string) (*sql.DB, error) {
-	db := sql.OpenDB(sqlite.Connector("file:"+filepath.Join(dir, "data.db"), func(ctx context.Context, conn driver.ConnPrepareContext) error {
-		return sqlite.ExecScript(conn.(sqlite.SQLConn), sqlSchema)
-	}, nil))
-
-	err := db.Ping()
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(dir, "data.db"))
 	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := db.Exec(sqlSchema); err != nil {
 		return nil, err
 	}
 
