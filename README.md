@@ -14,24 +14,27 @@ number of pastes.
 You can then test your changes to tclip by running `go run
 ./cmd/web` or `go run ./cmd/tclip` as appropriate.
 
-Note that for the first run of `./cmd/web`, you *must* set
+Note that for the first run of `./cmd/web`, you _must_ set
 either the `TS_AUTHKEY` environment variable, or run it with
 `--tsnet-verbose` to get the login URL for Tailscale.
 
 ## Building for prod
 
 The web server:
+
 ```
 nix build .#web
 ```
 
 The docker image:
+
 ```
 nix build .#docker
 docker load < ./result
 ```
 
 The portable service image:
+
 ```
 nix build .#portable-service
 ```
@@ -95,6 +98,12 @@ paste to your heart's content.
 #### Updating
 
 Run `flyctl deploy` to update the service.
+
+### Railway
+
+One-click deploy from a pre-configured [Railway](https://railway.app) template:
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/HzYDtl?referralCode=mg)
 
 ### Normal Docker
 
