@@ -126,6 +126,10 @@ LIMIT 5
 			return
 		}
 
+		if jpi.Filename == "" {
+			jpi.Filename = "untitled"
+		}
+
 		jpis = append(jpis, jpi)
 	}
 
@@ -220,6 +224,10 @@ func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
 	fname := r.Form.Get("filename")
 	data := r.Form.Get("content")
 	id := uuid.NewString()
+
+	if fname == "" {
+		fname = "untitled"
+	}
 
 	q := `
 INSERT INTO pastes
@@ -320,6 +328,10 @@ OFFSET ?1
 		if err != nil {
 			s.ShowError(w, r, err, http.StatusInternalServerError)
 			return
+		}
+
+		if jpi.Filename == "" {
+			jpi.Filename = "untitled"
 		}
 
 		jpis = append(jpis, jpi)
@@ -500,6 +512,10 @@ WHERE p.id = ?1`
 	if err != nil {
 		s.ShowError(w, r, fmt.Errorf("can't find paste %s: %w", id, err), http.StatusInternalServerError)
 		return
+	}
+
+	if fname == "" {
+		fname = "untitled"
 	}
 
 	lang := enry.GetLanguage(fname, []byte(data))
