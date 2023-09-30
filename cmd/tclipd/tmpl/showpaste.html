@@ -26,4 +26,25 @@
 
 <a class="my-4 font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}">Permalink</a> - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}/dl">Download</a> - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}/raw">Raw</a>{{if .RawHTML}} - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}/md">Fancy</a>{{end}}{{if eq .UserID .PasterUserID}} - <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/api/delete/{{.ID}}">Delete</a>{{end}}
 
+{{ if eq .UserID .PasterUserID }}
+    {{ if .Tokens }}
+        {{$ID := .ID}}
+        <h2 class="my-4 text-xl font-bold pb-2">Tokens to edit this note</h1>
+        <ul>
+            {{ range $k, $v := .Tokens }}
+            <li class="relative w-full">
+                <span>{{$v}}</span>
+                <a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/api/token/delete/{{$k}}?goback=1">Delete</a>
+            </li>
+            {{ end }}
+        </ul>
+    {{ end }}
+    <h2 class="my-4 text-xl font-bold pb-2">Create new token</h1>
+    <form action="/api/token/add/{{.ID}}">
+        <label for="description">Description: </label>
+        <input class="m-0" type="text" name="description"><br>
+        <button type="submit" class="font-semibold underline text-gray-900 hover:text-gray-500">Create new token</button>
+    </form>
+{{ end }}
+
 {{template "footer" .}}

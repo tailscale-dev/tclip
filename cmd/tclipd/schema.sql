@@ -18,3 +18,12 @@ CREATE TABLE IF NOT EXISTS users
   , display_name TEXT NOT NULL
   , profile_pic_url TEXT NOT NULL
   );
+
+-- Tokens that allow an anonymous user to set a paste
+CREATE TABLE IF NOT EXISTS paste_tokens
+    ( id TEXT PRIMARY KEY NOT NULL
+    , token TEXT NOT NULL UNIQUE
+    , paste_id TEXT NOT NULL
+    , description TEXT NOT NULL
+    , FOREIGN KEY (paste_id) REFERENCES pastes(id)
+    );
