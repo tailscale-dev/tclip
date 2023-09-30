@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -39,6 +40,7 @@ var (
 	dataDir         = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
 	tsnetLogVerbose = flag.Bool("tsnet-verbose", hasEnv("TSNET_VERBOSE"), "if set, have tsnet log verbosely to standard error")
 	useFunnel       = flag.Bool("use-funnel", hasEnv("USE_FUNNEL"), "if set, expose individual pastes to the public internet with Funnel, USE_FUNNEL in the environment")
+	useSetTokens    = flag.Bool("use-set-tokens", hasEnv("USE_SET_TOKENS"), "if set, allow the creation of set tokens so a external service can set the contents of one paste by using a previously generated token, USE_SET_TOKENS in the environment")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -191,6 +193,38 @@ func (s *Server) PublicIndex(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleGoBack(w http.ResponseWriter, r *http.Request) bool {
+	if r.URL.Query().Get("goback") == "1" {
+		http.Redirect(w, r, r.Referer(), http.StatusTemporaryRedirect)
+		return true
+	}
+	return false
+}
+
+// handleForm if client sent a form then return false otherwise true
+func handleForm(w http.ResponseWriter, r *http.Request) bool {
+	var err error
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data;") {
+		err = r.ParseMultipartForm(formDataLimit)
+	} else if r.Header.Get("Content-Type") == "application/x-www-form-urlencoded" {
+		err = r.ParseForm()
+	} else {
+		log.Printf("%s: unknown content type: %s", r.RemoteAddr, r.Header.Get("Content-Type"))
+		if w != nil {
+			http.Error(w, "bad content-type, should be a form", http.StatusBadRequest)
+		}
+		return true
+	}
+	if err != nil {
+		log.Printf("%s: bad form: %v", r.RemoteAddr, err)
+		if w != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		return true
+	}
+	return false
+}
+
 func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
 	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
@@ -198,19 +232,7 @@ func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data;") {
-		err = r.ParseMultipartForm(formDataLimit)
-	} else if r.Header.Get("Content-Type") == "application/x-www-form-urlencoded" {
-		err = r.ParseForm()
-	} else {
-		log.Printf("%s: unknown content type: %s", r.RemoteAddr, r.Header.Get("Content-Type"))
-		http.Error(w, "bad content-type, should be a form", http.StatusBadRequest)
-		return
-	}
-	if err != nil {
-		log.Printf("%s: bad form: %v", r.RemoteAddr, err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if handleForm(w, r) {
 		return
 	}
 
@@ -269,6 +291,164 @@ VALUES
 		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
 	}
 
+}
+
+func (s *Server) TailnetTokenDelete(w http.ResponseWriter, r *http.Request) {
+	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// /api/token/delete/{token_id}
+	sp := strings.Split(r.URL.Path, "/")
+	if len(sp) != 5 {
+		s.ShowError(w, r, errors.New("must be /api/token/delete/:token_id"), http.StatusBadRequest)
+	}
+	token_id := sp[4]
+	q := `
+DELETE FROM paste_tokens WHERE id in (
+    SELECT t.id from paste_tokens t
+    INNER JOIN pastes p ON p.id = t.paste_id
+    WHERE t.id = ?1
+      AND p.user_id = ?2
+    LIMIT 1
+)
+    `
+	res, err := s.db.ExecContext(
+		r.Context(),
+		q,
+		token_id,
+		userInfo.UserProfile.ID,
+	)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if rowsAffected == 0 {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	if handleGoBack(w, r) {
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) TailnetTokenAdd(w http.ResponseWriter, r *http.Request) {
+	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// /api/token/add/{paste_id}
+	sp := strings.Split(r.URL.Path, "/")
+	if len(sp) != 5 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "must be /api/token/add/:paste_id")
+		return
+	}
+	pasteId := sp[4]
+	description := ""
+	if !handleForm(nil, r) {
+		description = r.Form.Get("description")
+	}
+	if description == "" {
+		description = r.URL.Query().Get("description")
+	}
+	if description == "" {
+		description = "[no name]"
+	}
+
+	q := `
+SELECT id
+FROM pastes
+WHERE user_id = ?1 AND id = ?2 LIMIT 1
+    `
+	row := s.db.QueryRowContext(r.Context(), q, userInfo.UserProfile.ID, pasteId)
+	pasteId = ""
+	err = row.Scan(&pasteId)
+	if err != nil || pasteId == "" {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "unauthorized")
+		return
+	}
+	id := uuid.NewString()
+	token := uuid.NewString()
+	q = `
+INSERT INTO paste_tokens (id, token, paste_id, description) VALUES (?1, ?2, ?3, ?4)
+    `
+	_, err = s.db.ExecContext(
+		r.Context(),
+		q,
+		id,
+		token,
+		pasteId,
+		description,
+	)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Printf("new token %s for paste %s", id, pasteId)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "https://%s/api/token/set/%s", s.httpsURL, token)
+}
+
+func (s *Server) TailnetTokenSet(w http.ResponseWriter, r *http.Request) {
+	// /api/token/set/{id}
+	sp := strings.Split(r.URL.Path, "/")
+	if len(sp) != 5 {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "must be /api/token/set/:token")
+		return
+	}
+	token := sp[4]
+
+	q := `
+SELECT paste_id FROM paste_tokens WHERE token = ?1 LIMIT 1
+    `
+	var pasteId string
+	row := s.db.QueryRowContext(r.Context(), q, token)
+	err := row.Scan(&pasteId)
+	if err != nil || pasteId == "" {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "bad token")
+		return
+	}
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "bad body")
+		return
+	}
+	q = `
+        UPDATE pastes SET data = ?1 WHERE id = ?2
+    `
+	_, err = s.db.ExecContext(
+		r.Context(),
+		q,
+		data,
+		pasteId,
+	)
+	if err != nil {
+		log.Printf("%s: %v", r.RemoteAddr, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Printf("updated paste %s using token %s", pasteId, token)
+	w.WriteHeader(http.StatusOK)
 }
 
 type JoinedPasteInfo struct {
@@ -629,6 +809,27 @@ WHERE p.id = ?1`
 		remoteUserID = up.ID
 	}
 
+	var tokens map[string]string
+
+	if *useSetTokens /* && up != nil && userID == int64(up.ID) */ {
+		q := `
+SELECT id, description, token
+FROM paste_tokens
+    WHERE paste_id = ?1
+        `
+		tokens = map[string]string{}
+		rows, err := s.db.QueryContext(r.Context(), q, id)
+		if err != nil {
+			log.Printf("%s: %v", r.RemoteAddr, err)
+		} else {
+			for rows.Next() {
+				var id, description, token string
+				rows.Scan(&id, &description, &token)
+				tokens[id] = fmt.Sprintf("%s (%s...)", description, token[0:6])
+			}
+		}
+	}
+
 	err = s.tmpls.ExecuteTemplate(w, "showpaste.html", struct {
 		UserInfo            *tailcfg.UserProfile
 		Title               string
@@ -641,6 +842,7 @@ WHERE p.id = ?1`
 		Data                string
 		RawHTML             *template.HTML
 		CSSClass            string
+		Tokens              map[string]string
 	}{
 		UserInfo:            up,
 		Title:               fname,
@@ -653,6 +855,7 @@ WHERE p.id = ?1`
 		Data:                data,
 		RawHTML:             rawHTML,
 		CSSClass:            cssClass,
+		Tokens:              tokens,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
@@ -725,6 +928,11 @@ func main() {
 	tailnetMux.HandleFunc("/paste/list", srv.TailnetPasteIndex)
 	tailnetMux.HandleFunc("/api/post", srv.TailnetSubmitPaste)
 	tailnetMux.HandleFunc("/api/delete/", srv.TailnetDeletePost)
+	if *useSetTokens {
+		tailnetMux.HandleFunc("/api/token/add/", srv.TailnetTokenAdd)
+		tailnetMux.HandleFunc("/api/token/set/", srv.TailnetTokenSet)
+		tailnetMux.HandleFunc("/api/token/delete/", srv.TailnetTokenDelete)
+	}
 	tailnetMux.HandleFunc("/", srv.TailnetIndex)
 	tailnetMux.HandleFunc("/help", srv.TailnetHelp)
 
@@ -732,6 +940,9 @@ func main() {
 	funnelMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
 	funnelMux.HandleFunc("/", srv.PublicIndex)
 	funnelMux.HandleFunc("/paste/", srv.ShowPost)
+	if *useSetTokens {
+		funnelMux.HandleFunc("/api/token/set/", srv.TailnetTokenSet)
+	}
 
 	log.Printf("listening on http://%s", *hostname)
 	go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
