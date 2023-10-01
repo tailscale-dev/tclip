@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "description": "tclip, the pastebin for tailscale",
   "scripts": {
-    "start:css": "tailwindcss --watch -o cmd/web/static/css/base.css",
-    "build:css": "tailwindcss -o cmd/web/static/css/base.css"
+    "start:css": "tailwindcss --watch -o cmd/tclipd/static/css/base.css",
+    "build:css": "tailwindcss -o cmd/tclipd/static/css/base.css"
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.4",
