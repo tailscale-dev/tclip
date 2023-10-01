@@ -1,5 +1,5 @@
 module.exports = {
-    content: ["./cmd/web/tmpl/*.html"],
+    content: ["./cmd/tclipd/tmpl/*.html"],
     theme: {
       colors: {
         blue: {

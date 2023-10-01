@@ -12,9 +12,9 @@ number of pastes.
 3. `nix develop`
 
 You can then test your changes to tclip by running `go run
-./cmd/web` or `go run ./cmd/tclip` as appropriate.
+./cmd/tclipd` or `go run ./cmd/tclip` as appropriate.
 
-Note that for the first run of `./cmd/web`, you *must* set
+Note that for the first run of `./cmd/tclipd`, you *must* set
 either the `TS_AUTHKEY` environment variable, or run it with
 `--tsnet-verbose` to get the login URL for Tailscale.
 
@@ -22,7 +22,7 @@ either the `TS_AUTHKEY` environment variable, or run it with
 
 The web server:
 ```
-nix build .#web
+nix build .#tclipd
 ```
 
 The docker image:
