@@ -264,7 +264,7 @@ VALUES
 	switch r.Header.Get("Accept") {
 	case "text/plain":
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "https://%s/paste/%s", s.httpsURL, id)
+		fmt.Fprintf(w, "https://%s/paste/%s\n", s.httpsURL, id)
 	default:
 		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
 	}
