@@ -6,7 +6,7 @@
 {{if ne .PasterUserID .UserID}}
 <div class="float-right font-medium flex flex-row items-center">{{.PasterDisplayName}} {{if ne .PasterProfilePicURL ""}}<img class="ml-3 w-8 rounded-xl" src="{{.PasterProfilePicURL}}" />{{end}}</div>
 {{end}}
-{{else}}
+{{else if .DisplayUser}}
 <div class="float-right font-medium flex flex-row items-center"><span>{{.PasterDisplayName}}</span> {{if ne .PasterProfilePicURL ""}}<img class="ml-3 w-8 rounded-xl" src="{{.PasterProfilePicURL}}" />{{end}}</div>
 {{end}}
 

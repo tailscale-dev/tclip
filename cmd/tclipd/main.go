@@ -39,6 +39,7 @@ var (
 	dataDir         = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
 	tsnetLogVerbose = flag.Bool("tsnet-verbose", hasEnv("TSNET_VERBOSE"), "if set, have tsnet log verbosely to standard error")
 	useFunnel       = flag.Bool("use-funnel", hasEnv("USE_FUNNEL"), "if set, expose individual pastes to the public internet with Funnel, USE_FUNNEL in the environment")
+	hidePasteUserInfo       = flag.Bool("hide-funnel-users", hasEnv("HIDE_FUNNEL_USERS"), "if set, display the username and profile picture of the user who created the paste in funneled pastes")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -605,12 +606,14 @@ WHERE p.id = ?1`
 				CreatedAt           string
 				PasterDisplayName   string
 				PasterProfilePicURL string
+				DisplayUser         bool
 				RawHTML             *template.HTML
 			}{
 				Title:               title,
 				CreatedAt:           createdAt,
 				PasterDisplayName:   userDisplayName,
 				PasterProfilePicURL: userProfilePicURL,
+				DisplayUser:         !*hidePasteUserInfo,
 				RawHTML:             rawHTML,
 			})
 			if err != nil {
@@ -636,6 +639,7 @@ WHERE p.id = ?1`
 		PasterDisplayName   string
 		PasterProfilePicURL string
 		PasterUserID        int64
+		DisplayUser         bool
 		UserID              int64
 		ID                  string
 		Data                string
@@ -647,6 +651,7 @@ WHERE p.id = ?1`
 		CreatedAt:           createdAt,
 		PasterDisplayName:   userDisplayName,
 		PasterProfilePicURL: userProfilePicURL,
+		DisplayUser:         !*hidePasteUserInfo,
 		PasterUserID:        userID,
 		UserID:              int64(remoteUserID),
 		ID:                  id,
