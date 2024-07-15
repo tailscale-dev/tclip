@@ -35,11 +35,12 @@ import (
 )
 
 var (
-	hostname        = flag.String("hostname", envOr("TSNET_HOSTNAME", "paste"), "hostname to use on your tailnet, TSNET_HOSTNAME in the environment")
-	dataDir         = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
-	tsnetLogVerbose = flag.Bool("tsnet-verbose", hasEnv("TSNET_VERBOSE"), "if set, have tsnet log verbosely to standard error")
-	useFunnel       = flag.Bool("use-funnel", hasEnv("USE_FUNNEL"), "if set, expose individual pastes to the public internet with Funnel, USE_FUNNEL in the environment")
-	hidePasteUserInfo       = flag.Bool("hide-funnel-users", hasEnv("HIDE_FUNNEL_USERS"), "if set, display the username and profile picture of the user who created the paste in funneled pastes")
+	hostname          = flag.String("hostname", envOr("TSNET_HOSTNAME", "paste"), "hostname to use on your tailnet, TSNET_HOSTNAME in the environment")
+	dataDir           = flag.String("data-location", dataLocation(), "where data is stored, defaults to DATA_DIR or ~/.config/tailscale/paste")
+	tsnetLogVerbose   = flag.Bool("tsnet-verbose", hasEnv("TSNET_VERBOSE"), "if set, have tsnet log verbosely to standard error")
+	useFunnel         = flag.Bool("use-funnel", hasEnv("USE_FUNNEL"), "if set, expose individual pastes to the public internet with Funnel, USE_FUNNEL in the environment")
+	hidePasteUserInfo = flag.Bool("hide-funnel-users", hasEnv("HIDE_FUNNEL_USERS"), "if set, display the username and profile picture of the user who created the paste in funneled pastes")
+	httpPort          = flag.String("http-port", envOr("HTTP_PORT", ""), "optional http port to start an http server on, e.g for reverse proxies. will only serve funnel endpoints")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -740,6 +741,10 @@ func main() {
 
 	log.Printf("listening on http://%s", *hostname)
 	go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
+	if *httpPort != "" {
+		log.Printf("listening on :%s", *httpPort)
+		go func() { log.Fatal(http.ListenAndServe(":"+*httpPort, funnelMux)) }()
+	}
 
 	if *useFunnel {
 		log.Println("trying to listen on funnel")
