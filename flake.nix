@@ -21,12 +21,12 @@
     ] (system:
       let
       graft = pkgs: pkg: pkg.override {
-        buildGoModule = pkgs.buildGo121Module;
+        buildGoModule = pkgs.buildGo122Module;
       };
         pkgs = import nixpkgs {
           inherit system;
           overlays = [ gomod2nix.overlays.default (final: prev: {
-            go = prev.go_1_21;
+            go = prev.go;
             go-tools = graft prev prev.go-tools;
             gotools = graft prev prev.gotools;
             gopls = graft prev prev.gopls;
@@ -38,7 +38,7 @@
           tclipd = pkgs.buildGoApplication {
             pname = "tclipd";
             version = "0.1.0-${version}";
-            go = pkgs.go_1_21;
+            go = pkgs.go;
             src = ./.;
             subPackages = "cmd/tclipd";
             modules = ./gomod2nix.toml;
@@ -48,7 +48,7 @@
             pname = "tclip";
             inherit (tclipd) src version modules;
             subPackages = "cmd/tclip";
-            go = pkgs.go_1_21;
+            go = pkgs.go;
 
             CGO_ENABLED = "0";
           };
