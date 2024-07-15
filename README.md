@@ -36,6 +36,20 @@ The portable service image:
 nix build .#portable-service
 ```
 
+## Configuration
+
+These configuration options are available as command-line flags and
+environment variables. All of them are optional.
+
+| Command-line flag    | Environment variable | Default value               | Description                                                                                                  |
+|----------------------|----------------------|-----------------------------|--------------------------------------------------------------------------------------------------------------|
+| `-hostname`          | `TSNET_HOSTNAME`     | `paste`                     | The hostname to use on your tailnet.                                                                         |
+| `-data-location`     | `DATA_DIR`           | `~/.config/tailscale/paste` | Where program data is stored.                                                                                |
+| `-tsnet-verbose`     | `TSNET_VERBOSE`      | `false`                     | If set, tsnet will log verbosely to stderr.                                                                  |
+| `-use-funnel`        | `USE_FUNNEL`         | `false`                     | If set, expose individual pastes to the public internet with [Funnel](https://tailscale.com/kb/1223/funnel). |
+| `-hide-funnel-users` | `HIDE_FUNNEL_USERS`  | `false`                     | If set, don't display the username and profile picture of the user who created the paste in funneled pastes. |
+| `-http-port`         | `HTTP_PORT`          | unset                       | If set, expose individual pastes on a HTTP server running on the given port.                                 |
+
 ## Deploying
 
 There are several options you can take to deploy tclip. The most
