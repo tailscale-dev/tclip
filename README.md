@@ -49,6 +49,7 @@ environment variables. All of them are optional.
 | `-use-funnel`        | `USE_FUNNEL`         | `false`                     | If set, expose individual pastes to the public internet with [Funnel](https://tailscale.com/kb/1223/funnel). |
 | `-hide-funnel-users` | `HIDE_FUNNEL_USERS`  | `false`                     | If set, don't display the username and profile picture of the user who created the paste in funneled pastes. |
 | `-http-port`         | `HTTP_PORT`          | unset                       | If set, expose individual pastes on a HTTP server running on the given port.                                 |
+| `-control-url`       | `TSNET_CONTROL_URL`  | unset                     | If set, a custom control server to use, e.g. for Headscale users. |
 
 ## Deploying
 
