@@ -42,6 +42,7 @@ var (
 	hidePasteUserInfo = flag.Bool("hide-funnel-users", hasEnv("HIDE_FUNNEL_USERS"), "if set, display the username and profile picture of the user who created the paste in funneled pastes")
 	httpPort          = flag.String("http-port", envOr("HTTP_PORT", ""), "optional http port to start an http server on, e.g for reverse proxies. will only serve funnel endpoints")
 	controlUrl        = flag.String("control-url", envOr("TSNET_CONTROL_URL", ""), "optional alternate control server URL to use, for e.g. headscale")
+	disableHttps      = flag.Bool("disable-https", hasEnv("DISABLE_HTTPS"), "disable http serve, required for Headscale support")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -264,12 +265,18 @@ VALUES
 
 	log.Printf("new paste: %s", id)
 
+	protocol := "https"
+
+	if *disableHttps {
+		protocol = "http"
+	}
+
 	switch r.Header.Get("Accept") {
 	case "text/plain":
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "https://%s/paste/%s", s.httpsURL, id)
+		fmt.Fprintf(w, "%s://%s/paste/%s", protocol, s.httpsURL, id)
 	default:
-		http.Redirect(w, r, fmt.Sprintf("https://%s/paste/%s", s.httpsURL, id), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("%s://%s/paste/%s", protocol, s.httpsURL, id), http.StatusSeeOther)
 	}
 
 }
@@ -714,8 +721,9 @@ func main() {
 	ctx := context.Background()
 	httpsURL, ok := lc.ExpandSNIName(ctx, *hostname)
 	if !ok {
-		log.Println(httpsURL)
-		log.Fatal("HTTPS is not enabled in the admin panel")
+		// log.Println(httpsURL)
+		// log.Fatal("HTTPS is not enabled in the admin panel")
+		httpsURL = *hostname
 	}
 
 	ln, err := s.Listen("tcp", ":80")
@@ -742,10 +750,15 @@ func main() {
 	funnelMux.HandleFunc("/paste/", srv.ShowPost)
 
 	log.Printf("listening on http://%s", *hostname)
-	go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
 	if *httpPort != "" {
 		log.Printf("listening on :%s", *httpPort)
 		go func() { log.Fatal(http.ListenAndServe(":"+*httpPort, funnelMux)) }()
+	}
+
+	if *disableHttps {
+		log.Fatal(http.Serve(ln, tailnetMux))
+	} else {
+		go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
 	}
 
 	if *useFunnel {
