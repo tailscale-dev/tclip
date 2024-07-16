@@ -721,9 +721,12 @@ func main() {
 	ctx := context.Background()
 	httpsURL, ok := lc.ExpandSNIName(ctx, *hostname)
 	if !ok {
-		// log.Println(httpsURL)
-		// log.Fatal("HTTPS is not enabled in the admin panel")
-		httpsURL = *hostname
+		if *disableHttps {
+			httpsURL = *hostname
+		} else {
+			log.Println(httpsURL)
+			log.Fatal("HTTPS is not enabled in the admin panel")
+		}
 	}
 
 	ln, err := s.Listen("tcp", ":80")
