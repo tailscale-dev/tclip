@@ -41,6 +41,7 @@ var (
 	useFunnel         = flag.Bool("use-funnel", hasEnv("USE_FUNNEL"), "if set, expose individual pastes to the public internet with Funnel, USE_FUNNEL in the environment")
 	hidePasteUserInfo = flag.Bool("hide-funnel-users", hasEnv("HIDE_FUNNEL_USERS"), "if set, display the username and profile picture of the user who created the paste in funneled pastes")
 	httpPort          = flag.String("http-port", envOr("HTTP_PORT", ""), "optional http port to start an http server on, e.g for reverse proxies. will only serve funnel endpoints")
+	controlUrl        = flag.String("control-url", envOr("TSNET_CONTROL_URL", ""), "optional alternate control server URL to use, for e.g. headscale")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -672,9 +673,10 @@ func main() {
 	os.MkdirAll(filepath.Join(*dataDir, "tsnet"), 0700)
 
 	s := &tsnet.Server{
-		Hostname: *hostname,
-		Dir:      filepath.Join(*dataDir, "tsnet"),
-		Logf:     func(string, ...any) {},
+		Hostname:   *hostname,
+		Dir:        filepath.Join(*dataDir, "tsnet"),
+		Logf:       func(string, ...any) {},
+		ControlURL: *controlUrl,
 	}
 
 	if *tsnetLogVerbose {
