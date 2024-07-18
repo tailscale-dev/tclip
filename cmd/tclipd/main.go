@@ -85,7 +85,7 @@ type Server struct {
 	lc       *tailscale.LocalClient // localclient to tsnet server
 	db       *sql.DB                // SQLite datastore
 	tmpls    *template.Template     // HTML templates
-	httpsURL string                 // the tailnet/public base URL of this service
+	tclipURL string                 // the tailnet/public base URL of this service
 }
 
 func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
@@ -274,9 +274,9 @@ VALUES
 	switch r.Header.Get("Accept") {
 	case "text/plain":
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "%s://%s/paste/%s", protocol, s.httpsURL, id)
+		fmt.Fprintf(w, "%s://%s/paste/%s", protocol, s.tclipURL, id)
 	default:
-		http.Redirect(w, r, fmt.Sprintf("%s://%s/paste/%s", protocol, s.httpsURL, id), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("%s://%s/paste/%s", protocol, s.tclipURL, id), http.StatusSeeOther)
 	}
 
 }
@@ -719,12 +719,12 @@ func main() {
 	}
 
 	ctx := context.Background()
-	httpsURL, ok := lc.ExpandSNIName(ctx, *hostname)
+	tclipURL, ok := lc.ExpandSNIName(ctx, *hostname)
 	if !ok {
 		if *disableHttps {
-			httpsURL = *hostname
+			tclipURL = *hostname
 		} else {
-			log.Println(httpsURL)
+			log.Println(tclipURL)
 			log.Fatal("HTTPS is not enabled in the admin panel")
 		}
 	}
@@ -736,7 +736,7 @@ func main() {
 
 	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.html"))
 
-	srv := &Server{lc, db, tmpls, httpsURL}
+	srv := &Server{lc, db, tmpls, tclipURL}
 
 	tailnetMux := http.NewServeMux()
 	tailnetMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
@@ -772,18 +772,18 @@ func main() {
 		}
 		defer ln.Close()
 
-		log.Printf("listening on https://%s", httpsURL)
+		log.Printf("listening on https://%s", tclipURL)
 		log.Fatal(MixedCriticalityHandler{
 			Public:  funnelMux,
 			Private: tailnetMux,
 		}.Serve(ln))
-	} else {
+	} else if !*disableHttps {
 		ln, err := s.ListenTLS("tcp", ":443")
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer ln.Close()
-		log.Printf("listening on https://%s", httpsURL)
+		log.Printf("listening on https://%s", tclipURL)
 		log.Fatal(http.Serve(ln, tailnetMux))
 	}
 }
