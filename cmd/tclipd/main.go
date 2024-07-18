@@ -777,7 +777,7 @@ func main() {
 			Public:  funnelMux,
 			Private: tailnetMux,
 		}.Serve(ln))
-	} else if !*disableHTTPS {
+	} else {
 		ln, err := s.ListenTLS("tcp", ":443")
 		if err != nil {
 			log.Fatal(err)
