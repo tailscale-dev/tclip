@@ -42,7 +42,7 @@ var (
 	hidePasteUserInfo = flag.Bool("hide-funnel-users", hasEnv("HIDE_FUNNEL_USERS"), "if set, display the username and profile picture of the user who created the paste in funneled pastes")
 	httpPort          = flag.String("http-port", envOr("HTTP_PORT", ""), "optional http port to start an http server on, e.g for reverse proxies. will only serve funnel endpoints")
 	controlUrl        = flag.String("control-url", envOr("TSNET_CONTROL_URL", ""), "optional alternate control server URL to use, for e.g. headscale")
-	disableHttps      = flag.Bool("disable-https", hasEnv("DISABLE_HTTPS"), "disable http serve, required for Headscale support")
+	disableHTTPS      = flag.Bool("disable-https", hasEnv("DISABLE_HTTPS"), "disable http serve, required for Headscale support")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -267,7 +267,7 @@ VALUES
 
 	protocol := "https"
 
-	if *disableHttps {
+	if *disableHTTPS {
 		protocol = "http"
 	}
 
@@ -721,7 +721,7 @@ func main() {
 	ctx := context.Background()
 	tclipURL, ok := lc.ExpandSNIName(ctx, *hostname)
 	if !ok {
-		if *disableHttps {
+		if *disableHTTPS {
 			tclipURL = *hostname
 		} else {
 			log.Println(tclipURL)
@@ -758,7 +758,7 @@ func main() {
 		go func() { log.Fatal(http.ListenAndServe(":"+*httpPort, funnelMux)) }()
 	}
 
-	if *disableHttps {
+	if *disableHTTPS {
 		log.Fatal(http.Serve(ln, tailnetMux))
 	} else {
 		go func() { log.Fatal(http.Serve(ln, tailnetMux)) }()
@@ -777,7 +777,7 @@ func main() {
 			Public:  funnelMux,
 			Private: tailnetMux,
 		}.Serve(ln))
-	} else if !*disableHttps {
+	} else if !*disableHTTPS {
 		ln, err := s.ListenTLS("tcp", ":443")
 		if err != nil {
 			log.Fatal(err)
