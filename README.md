@@ -53,7 +53,7 @@ environment variables. All of them are optional.
 | `-hide-funnel-users` | `HIDE_FUNNEL_USERS`  | `false`                     | If set, don't display the username and profile picture of the user who created the paste in funneled pastes. |
 | `-http-port`         | `HTTP_PORT`          | unset                       | If set, expose individual pastes on a HTTP server running on the given port.                                 |
 | `-control-url`       | `TSNET_CONTROL_URL`  | unset                       | If set, a custom control server to use, e.g. for Headscale users.                                            |
-| `-disable-https`     | `DISABLE_HTTPS`      | `false`                     | If set, disable serving on HTTPS with Server. Useful for Headscale deployments.                              |
+| `-disable-https`     | `DISABLE_HTTPS`      | `false`                     | If set, disable serving on HTTPS with Serve. Useful for Headscale deployments.                              |
 
 ## Deploying
 
