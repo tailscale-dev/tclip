@@ -37,6 +37,7 @@ jobs:
         docker push ghcr.io/tailscale-dev/tclip:arm64
         docker push ghcr.io/tailscale-dev/tclip:amd64
         docker manifest create ghcr.io/tailscale-dev/tclip:latest ghcr.io/tailscale-dev/tclip:arm64 ghcr.io/tailscale-dev/tclip:amd64
+        docker manifest push ghcr.io/tailscale-dev/tclip:latest
     - name: "Portable service build"
       run: |
         nix build .#portable-service
