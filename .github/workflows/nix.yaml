@@ -20,7 +20,9 @@ jobs:
         nix build .#tclip .#tclipd
     - name: "Docker image build"
       run: |
-        nix build .#docker
+        nix build .#docker_amd64
+        docker load < ./result
+        nix build .#docker_arm64
         docker load < ./result
     - name: "docker login"
       uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
@@ -32,7 +34,9 @@ jobs:
     - name: "Docker image push"
       if: "github.event_name == 'push' && github.ref_name == 'main'"
       run: |
-        docker push ghcr.io/tailscale-dev/tclip:latest
+        docker push ghcr.io/tailscale-dev/tclip:arm64
+        docker push ghcr.io/tailscale-dev/tclip:amd64
+        docker manifest create ghcr.io/tailscale-dev/tclip:latest ghcr.io/tailscale-dev/tclip:arm64 ghcr.io/tailscale-dev/tclip:amd64
     - name: "Portable service build"
       run: |
         nix build .#portable-service
