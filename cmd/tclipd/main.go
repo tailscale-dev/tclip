@@ -43,6 +43,7 @@ var (
 	httpPort          = flag.String("http-port", envOr("HTTP_PORT", ""), "optional http port to start an http server on, e.g for reverse proxies. will only serve funnel endpoints")
 	controlUrl        = flag.String("control-url", envOr("TSNET_CONTROL_URL", ""), "optional alternate control server URL to use, for e.g. headscale")
 	disableHTTPS      = flag.Bool("disable-https", hasEnv("DISABLE_HTTPS"), "disable http serve, required for Headscale support")
+	disableLineNumbers= flag.Bool("disable-line-numbers", hasEnv("DISABLE_LINE_NUMBERS"), "disables line numbers on paste content")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -517,6 +518,7 @@ WHERE p.id = ?1`
 	var fname, data, userLoginName, userDisplayName, userProfilePicURL string
 	var userID int64
 	var createdAt string
+	var lineNumbers string
 
 	err := row.Scan(&fname, &createdAt, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
 	if err != nil {
@@ -535,6 +537,12 @@ WHERE p.id = ?1`
 	var cssClass string
 	if lang != "" {
 		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
+	}
+
+	lineNumbers = "line-numbers"
+
+	if *disableLineNumbers {
+		lineNumbers = "no-line-numbers"
 	}
 
 	p := bluemonday.UGCPolicy()
@@ -654,6 +662,7 @@ WHERE p.id = ?1`
 		Data                string
 		RawHTML             *template.HTML
 		CSSClass            string
+		DisableLineNumbers  string
 	}{
 		UserInfo:            up,
 		Title:               fname,
@@ -667,6 +676,7 @@ WHERE p.id = ?1`
 		Data:                data,
 		RawHTML:             rawHTML,
 		CSSClass:            cssClass,
+		DisableLineNumbers:  lineNumbers,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
