@@ -532,7 +532,7 @@ WHERE p.id = ?1`
 
 	var rawHTML *template.HTML
 
-	var cssClass string
+	cssClass := "language-text"
 	if lang != "" {
 		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
 	}
