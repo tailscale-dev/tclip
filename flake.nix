@@ -25,6 +25,7 @@
       };
 
       nixosModules.tclip = {
+        pkgs,
         config,
         lib,
         ...
@@ -40,7 +41,7 @@
               description = ''
                 tclip package to use
               '';
-              default = self.packages."${system}".tclipd;
+              default = self.packages."${pkgs.system}".tclipd;
             };
 
             dataDir = mkOption {
@@ -85,7 +86,7 @@
           };
           config = mkIf cfg.enable {
             environment.systemPackages = [
-              self.packages."${system}".tclip
+              self.packages."${pkgs.system}".tclip
             ];
 
             users.users."${cfg.user}" = {
@@ -154,6 +155,10 @@
       };
       version = builtins.substring 0 8 self.lastModifiedDate;
     in {
+      # Formatter for your nix files, available through 'nix fmt'
+      # Other options beside 'alejandra' include 'nixpkgs-fmt'
+      formatter = pkgs.alejandra;
+
       packages = rec {
         tclipd = pkgs.buildGoApplication {
           pname = "tclipd";
