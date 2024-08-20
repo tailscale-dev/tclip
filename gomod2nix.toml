@@ -58,6 +58,9 @@ schema = 3
   [mod."github.com/bits-and-blooms/bitset"]
     version = "v1.13.0"
     hash = "sha256-1jccFEH9In72Jt3wSn4vi4/MJd/UDfDrC9DlmsGVc9o="
+  [mod."github.com/coder/websocket"]
+    version = "v1.8.12"
+    hash = "sha256-jEaJSKcwmKtXFkvtxwpEdFMdazXZM6bY2u5TGBimklI="
   [mod."github.com/coreos/go-iptables"]
     version = "v0.7.1-0.20240112124308-65c67c9f46e6"
     hash = "sha256-kjnry8ld5Keew5q+tX7GSdGVZaXlehs2Lt+z8Rokhns="
@@ -212,8 +215,8 @@ schema = 3
     version = "v0.0.0-20240226180453-5db17b287bf1"
     hash = "sha256-iE8PCr0At4P75cG7dDa6fwhARJUIUw9pwvgtQNMOjAA="
   [mod."github.com/tailscale/wireguard-go"]
-    version = "v0.0.0-20240705152531-2f5d148bcfe1"
-    hash = "sha256-EYmoesQpcEZMINwLO8LvtElo9Jux9UxOScejqf8ZC5A="
+    version = "v0.0.0-20240731203015-71393c576b98"
+    hash = "sha256-AwaqXLIKa9TtyZJbAYwojPRC4p9NWxhk2GdQp/z6Khc="
   [mod."github.com/tcnksm/go-httpstat"]
     version = "v0.2.0"
     hash = "sha256-bCWn8E+DcZY6+yPu07AF3hCcDZx3CFdD74qfpDIgVqI="
@@ -242,8 +245,8 @@ schema = 3
     version = "v0.0.0-20240119083558-1b970713d09a"
     hash = "sha256-JQ3JLywTjgboNhs12blhOkS3ty7m8sUa/zaWv1k/X28="
   [mod."golang.org/x/mod"]
-    version = "v0.18.0"
-    hash = "sha256-zCSO2dmE0nhrScqRKzIUeqiELzCyBA6MDAW1NV1hTZw="
+    version = "v0.19.0"
+    hash = "sha256-9TUzg1aDvdZw3Z8IyGGSVSnLfUwgeGC/vrnkhkarXL4="
   [mod."golang.org/x/net"]
     version = "v0.27.0"
     hash = "sha256-GrlN5isYeEVrPZVAHK0MDQatttbnyfSPoWJHj0xqhjk="
@@ -263,8 +266,8 @@ schema = 3
     version = "v0.5.0"
     hash = "sha256-W6RgwgdYTO3byIPOFxrP2IpAZdgaGowAaVfYby7AULU="
   [mod."golang.org/x/tools"]
-    version = "v0.22.0"
-    hash = "sha256-07Vf9dS8pa2JAXpbNc03Kf6d3SkX1R0MdJSysRS2IOI="
+    version = "v0.23.0"
+    hash = "sha256-z+9n75A3H4YtF+m60qwOXnmrVFtOvXsKQmc+i7Mb6q0="
   [mod."golang.zx2c4.com/wintun"]
     version = "v0.0.0-20230126152724-0fa3db229ce2"
     hash = "sha256-cjMLNjKnnupVROWmeASORVieAL9ieYdzX3cFzG8bCpo="
@@ -272,8 +275,8 @@ schema = 3
     version = "v0.5.3"
     hash = "sha256-wcJWS/4Fqbc+1RHSntex0zBdlHiZfzrea4QabYkNKvU="
   [mod."gvisor.dev/gvisor"]
-    version = "v0.0.0-20240306221502-ee1e1f6070e3"
-    hash = "sha256-veCyTYMx5N/K7xU86GgQupjAjjiL3hlvIjz+jhBFM/0="
+    version = "v0.0.0-20240722211153-64c016c92987"
+    hash = "sha256-7cE5aVAN6o+9GB7NJeAexSGAe0CkgcBADIWWHQhsSCU="
   [mod."modernc.org/gc/v3"]
     version = "v3.0.0-20240304020402-f0dba7c97c2b"
     hash = "sha256-mNcc0Tw2uVVb9YzBUhZ5POHxBiUnCckQywHm/p9NI9s="
@@ -295,9 +298,6 @@ schema = 3
   [mod."modernc.org/token"]
     version = "v1.1.0"
     hash = "sha256-m8WyXJ9Mdw6B43wmy2+3HE7zHEi9ocBrhwe/eq+zdu8="
-  [mod."nhooyr.io/websocket"]
-    version = "v1.8.10"
-    hash = "sha256-EsUWUFIA2uJTap1DfsYuSxlPMH3UHDpxEohJMalDOcI="
   [mod."tailscale.com"]
-    version = "v1.70.0"
-    hash = "sha256-46h0ZcMmsdD7BFO495Mw1QpvQskv5ZyfZerFThvNUK0="
+    version = "v1.72.0"
+    hash = "sha256-qI2iB5SwHaZ5XFoSVo6zxQ70vlxbtfi1ARDP46GcKuY="
