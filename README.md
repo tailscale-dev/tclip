@@ -54,7 +54,8 @@ environment variables. All of them are optional.
 | `-http-port`            | `HTTP_PORT`            | unset                       | If set, expose individual pastes on a HTTP server running on the given port.                                 |
 | `-control-url`          | `TSNET_CONTROL_URL`    | unset                       | If set, a custom control server to use, e.g. for Headscale users.                                            |
 | `-disable-https`        | `DISABLE_HTTPS`        | `false`                     | If set, disable serving on HTTPS with Serve. Useful for Headscale deployments.                               |
-| `-disable-line-numbers` | `DISABLE_LINE_NUMBERS` | `false`                     | If set, disable the line numbers being shown when viewing a paste.                                           |
+| `-enable-line-numbers`  | `ENABLE_LINE_NUMBERS`  | `false`                     | If set, enable line numbers being shown when viewing a paste.                                                |
+| `-enable-word-wrap`     | `ENABLE_WORD_WRAP`     | `false`                     | If set, allows lines to break and wrap to the following line.                                                |
 
 ## Deploying
 

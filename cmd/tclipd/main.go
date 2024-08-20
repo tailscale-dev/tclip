@@ -43,7 +43,8 @@ var (
 	httpPort          = flag.String("http-port", envOr("HTTP_PORT", ""), "optional http port to start an http server on, e.g for reverse proxies. will only serve funnel endpoints")
 	controlUrl        = flag.String("control-url", envOr("TSNET_CONTROL_URL", ""), "optional alternate control server URL to use, for e.g. headscale")
 	disableHTTPS      = flag.Bool("disable-https", hasEnv("DISABLE_HTTPS"), "disable http serve, required for Headscale support")
-	disableLineNumbers= flag.Bool("disable-line-numbers", hasEnv("DISABLE_LINE_NUMBERS"), "disables line numbers on paste content")
+	enableLineNumbers = flag.Bool("enable-line-numbers", hasEnv("ENABLE_LINE_NUMBERS"), "enables line numbers on paste content")
+	enableWordWrap    = flag.Bool("enable-word-wrap", hasEnv("ENABLE_WORD_WRAP"), "enable word wrap on paste content")
 
 	//go:embed schema.sql
 	sqlSchema string
@@ -515,10 +516,9 @@ INNER JOIN users u
 WHERE p.id = ?1`
 
 	row := s.db.QueryRowContext(r.Context(), q, id)
-	var fname, data, userLoginName, userDisplayName, userProfilePicURL string
+	var fname, data, userLoginName, userDisplayName, userProfilePicURL, lineNumbersClass, wordWrapClass string
 	var userID int64
 	var createdAt string
-	var lineNumbers string
 
 	err := row.Scan(&fname, &createdAt, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
 	if err != nil {
@@ -539,10 +539,14 @@ WHERE p.id = ?1`
 		cssClass = fmt.Sprintf("lang-%s", strings.ToLower(lang))
 	}
 
-	lineNumbers = "line-numbers"
+	lineNumbersClass = "no-line-numbers"
+	if *enableLineNumbers {
+		lineNumbersClass = "line-numbers"
+	}
 
-	if *disableLineNumbers {
-		lineNumbers = "no-line-numbers"
+	wordWrapClass = "word-wrap-off"
+	if *enableWordWrap {
+		wordWrapClass = "word-wrap-on"
 	}
 
 	p := bluemonday.UGCPolicy()
@@ -662,7 +666,8 @@ WHERE p.id = ?1`
 		Data                string
 		RawHTML             *template.HTML
 		CSSClass            string
-		DisableLineNumbers  string
+		EnableLineNumbers   string
+		EnableWordWrap		string
 	}{
 		UserInfo:            up,
 		Title:               fname,
@@ -676,7 +681,8 @@ WHERE p.id = ?1`
 		Data:                data,
 		RawHTML:             rawHTML,
 		CSSClass:            cssClass,
-		DisableLineNumbers:  lineNumbers,
+		EnableLineNumbers:   lineNumbersClass,
+		EnableWordWrap:		 wordWrapClass,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
