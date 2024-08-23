@@ -44,16 +44,18 @@ nix build .#portable-service
 These configuration options are available as command-line flags and
 environment variables. All of them are optional.
 
-| Command-line flag    | Environment variable | Default value               | Description                                                                                                  |
-| -------------------- | -------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `-hostname`          | `TSNET_HOSTNAME`     | `paste`                     | The hostname to use on your tailnet.                                                                         |
-| `-data-location`     | `DATA_DIR`           | `~/.config/tailscale/paste` | Where program data is stored.                                                                                |
-| `-tsnet-verbose`     | `TSNET_VERBOSE`      | `false`                     | If set, tsnet will log verbosely to stderr.                                                                  |
-| `-use-funnel`        | `USE_FUNNEL`         | `false`                     | If set, expose individual pastes to the public internet with [Funnel](https://tailscale.com/kb/1223/funnel). |
-| `-hide-funnel-users` | `HIDE_FUNNEL_USERS`  | `false`                     | If set, don't display the username and profile picture of the user who created the paste in funneled pastes. |
-| `-http-port`         | `HTTP_PORT`          | unset                       | If set, expose individual pastes on a HTTP server running on the given port.                                 |
-| `-control-url`       | `TSNET_CONTROL_URL`  | unset                       | If set, a custom control server to use, e.g. for Headscale users.                                            |
-| `-disable-https`     | `DISABLE_HTTPS`      | `false`                     | If set, disable serving on HTTPS with Serve. Useful for Headscale deployments.                              |
+| Command-line flag       | Environment variable   | Default value               | Description                                                                                                  |
+| ----------------------- | ---------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `-hostname`             | `TSNET_HOSTNAME`       | `paste`                     | The hostname to use on your tailnet.                                                                         |
+| `-data-location`        | `DATA_DIR`             | `~/.config/tailscale/paste` | Where program data is stored.                                                                                |
+| `-tsnet-verbose`        | `TSNET_VERBOSE`        | `false`                     | If set, tsnet will log verbosely to stderr.                                                                  |
+| `-use-funnel`           | `USE_FUNNEL`           | `false`                     | If set, expose individual pastes to the public internet with [Funnel](https://tailscale.com/kb/1223/funnel). |
+| `-hide-funnel-users`    | `HIDE_FUNNEL_USERS`    | `false`                     | If set, don't display the username and profile picture of the user who created the paste in funneled pastes. |
+| `-http-port`            | `HTTP_PORT`            | unset                       | If set, expose individual pastes on a HTTP server running on the given port.                                 |
+| `-control-url`          | `TSNET_CONTROL_URL`    | unset                       | If set, a custom control server to use, e.g. for Headscale users.                                            |
+| `-disable-https`        | `DISABLE_HTTPS`        | `false`                     | If set, disable serving on HTTPS with Serve. Useful for Headscale deployments.                               |
+| `-enable-line-numbers`  | `ENABLE_LINE_NUMBERS`  | `false`                     | If set, enable line numbers being shown when viewing a paste.                                                |
+| `-enable-word-wrap`     | `ENABLE_WORD_WRAP`     | `false`                     | If set, allows lines to break and wrap to the following line.                                                |
 
 ## Deploying
 

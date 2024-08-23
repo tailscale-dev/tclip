@@ -4,6 +4,13 @@
     code span.token.table {
       display: inline
     }
+
+    .word-wrap-off {
+      white-space: pre !important;
+    }
+    .word-wrap-on {
+      white-space: pre-wrap !important;
+    }
 </style>
 
 <script src="/static/js/prism.js"></script>
@@ -23,8 +30,8 @@
 {{.RawHTML}}
 </article>
 {{else}}
-<div style="display:inline-block;">
-<pre><code class="my-6 max-w-full {{.CSSClass}}">{{.Data}}
+<div style="display:inline-block;width:100%;">
+<pre class="{{.EnableLineNumbers}} {{.EnableWordWrap}}"><code class="my-6 max-w-full {{.CSSClass}}">{{.Data}}
 </code></pre>
 </div>
 <br />
