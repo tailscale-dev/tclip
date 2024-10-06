@@ -10,15 +10,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1725515722,
-        "narHash": "sha256-+gljgHaflZhQXtr3WjJrGn8NXv7MruVPAORSufuCFnw=",
-        "owner": "tweag",
+        "lastModified": 1725226629,
+        "narHash": "sha256-0l5gtNAf3408INFPbvbMvHghd44LgKhMuqUcY6vH5N8=",
+        "owner": "obreitwi",
         "repo": "gomod2nix",
-        "rev": "1c6fd4e862bf2f249c9114ad625c64c6c29a8a08",
+        "rev": "983228366edc1bed1be6e6f7a45e285b4707b9ba",
         "type": "github"
       },
       "original": {
-        "owner": "tweag",
+        "owner": "obreitwi",
+        "ref": "fix/go_mod_vendor",
         "repo": "gomod2nix",
         "type": "github"
       }
@@ -65,11 +66,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1710146030,
-        "narHash": "sha256-SZ5L6eA7HJ/nmkzGG7/ISclqe6oZdOZTNoesiInkXPQ=",
+        "lastModified": 1726560853,
+        "narHash": "sha256-X6rJYSESBVr3hBoH0WbKE5KvhPU5bloyZ2L4K60/fPQ=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "b1d9ab70662946ef0850d488da1c9019f3a9752a",
+        "rev": "c1dfcf08411b08f6b8615f7d8971a2bfa81d5e8a",
         "type": "github"
       },
       "original": {

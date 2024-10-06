@@ -6,7 +6,7 @@
     utils.url = "github:numtide/flake-utils";
 
     gomod2nix = {
-      url = "github:tweag/gomod2nix";
+      url = "github:obreitwi/gomod2nix/fix/go_mod_vendor";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "utils";
     };
@@ -21,12 +21,12 @@
     ] (system:
       let
       graft = pkgs: pkg: pkg.override {
-        buildGoModule = pkgs.buildGo122Module;
+        buildGoModule = pkgs.buildGo123Module;
       };
         pkgs = import nixpkgs {
           inherit system;
           overlays = [ gomod2nix.overlays.default (final: prev: {
-            go = prev.go;
+            go = prev.go_1_23;
             go-tools = graft prev prev.go-tools;
             gotools = graft prev prev.gotools;
             gopls = graft prev prev.gopls;
@@ -86,7 +86,7 @@
 
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            go
+            go_1_23
             gopls
             gotools
             go-tools
