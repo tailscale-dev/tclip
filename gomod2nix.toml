@@ -1,12 +1,10 @@
-schema = 3
+schema = 4
+vendorModulesTxt = "# filippo.io/edwards25519 v1.1.0\n## explicit; go 1.20\nfilippo.io/edwards25519\nfilippo.io/edwards25519/field\n# github.com/akutz/memconn v0.1.0\n## explicit\ngithub.com/akutz/memconn\n# github.com/alexbrainman/sspi v0.0.0-20231016080023-1a75b4708caa\n## explicit; go 1.13\ngithub.com/alexbrainman/sspi\ngithub.com/alexbrainman/sspi/internal/common\ngithub.com/alexbrainman/sspi/negotiate\n# github.com/aws/aws-sdk-go-v2 v1.24.1\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/aws\ngithub.com/aws/aws-sdk-go-v2/aws/arn\ngithub.com/aws/aws-sdk-go-v2/aws/defaults\ngithub.com/aws/aws-sdk-go-v2/aws/middleware\ngithub.com/aws/aws-sdk-go-v2/aws/middleware/private/metrics\ngithub.com/aws/aws-sdk-go-v2/aws/protocol/query\ngithub.com/aws/aws-sdk-go-v2/aws/protocol/restjson\ngithub.com/aws/aws-sdk-go-v2/aws/protocol/xml\ngithub.com/aws/aws-sdk-go-v2/aws/ratelimit\ngithub.com/aws/aws-sdk-go-v2/aws/retry\ngithub.com/aws/aws-sdk-go-v2/aws/signer/internal/v4\ngithub.com/aws/aws-sdk-go-v2/aws/signer/v4\ngithub.com/aws/aws-sdk-go-v2/aws/transport/http\ngithub.com/aws/aws-sdk-go-v2/internal/auth\ngithub.com/aws/aws-sdk-go-v2/internal/auth/smithy\ngithub.com/aws/aws-sdk-go-v2/internal/endpoints\ngithub.com/aws/aws-sdk-go-v2/internal/endpoints/awsrulesfn\ngithub.com/aws/aws-sdk-go-v2/internal/rand\ngithub.com/aws/aws-sdk-go-v2/internal/sdk\ngithub.com/aws/aws-sdk-go-v2/internal/sdkio\ngithub.com/aws/aws-sdk-go-v2/internal/shareddefaults\ngithub.com/aws/aws-sdk-go-v2/internal/strings\ngithub.com/aws/aws-sdk-go-v2/internal/sync/singleflight\ngithub.com/aws/aws-sdk-go-v2/internal/timeconv\n# github.com/aws/aws-sdk-go-v2/config v1.26.5\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/config\n# github.com/aws/aws-sdk-go-v2/credentials v1.16.16\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/credentials\ngithub.com/aws/aws-sdk-go-v2/credentials/ec2rolecreds\ngithub.com/aws/aws-sdk-go-v2/credentials/endpointcreds\ngithub.com/aws/aws-sdk-go-v2/credentials/endpointcreds/internal/client\ngithub.com/aws/aws-sdk-go-v2/credentials/processcreds\ngithub.com/aws/aws-sdk-go-v2/credentials/ssocreds\ngithub.com/aws/aws-sdk-go-v2/credentials/stscreds\n# github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.11\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/feature/ec2/imds\ngithub.com/aws/aws-sdk-go-v2/feature/ec2/imds/internal/config\n# github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.10\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/internal/configsources\n# github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.10\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/internal/endpoints/v2\n# github.com/aws/aws-sdk-go-v2/internal/ini v1.7.2\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/internal/ini\n# github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.4\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/service/internal/accept-encoding\n# github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.10\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/service/internal/presigned-url\n# github.com/aws/aws-sdk-go-v2/service/ssm v1.44.7\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/service/ssm\ngithub.com/aws/aws-sdk-go-v2/service/ssm/internal/endpoints\ngithub.com/aws/aws-sdk-go-v2/service/ssm/types\n# github.com/aws/aws-sdk-go-v2/service/sso v1.18.7\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/service/sso\ngithub.com/aws/aws-sdk-go-v2/service/sso/internal/endpoints\ngithub.com/aws/aws-sdk-go-v2/service/sso/types\n# github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.7\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/service/ssooidc\ngithub.com/aws/aws-sdk-go-v2/service/ssooidc/internal/endpoints\ngithub.com/aws/aws-sdk-go-v2/service/ssooidc/types\n# github.com/aws/aws-sdk-go-v2/service/sts v1.26.7\n## explicit; go 1.19\ngithub.com/aws/aws-sdk-go-v2/service/sts\ngithub.com/aws/aws-sdk-go-v2/service/sts/internal/endpoints\ngithub.com/aws/aws-sdk-go-v2/service/sts/types\n# github.com/aws/smithy-go v1.19.0\n## explicit; go 1.19\ngithub.com/aws/smithy-go\ngithub.com/aws/smithy-go/auth\ngithub.com/aws/smithy-go/auth/bearer\ngithub.com/aws/smithy-go/context\ngithub.com/aws/smithy-go/document\ngithub.com/aws/smithy-go/encoding\ngithub.com/aws/smithy-go/encoding/httpbinding\ngithub.com/aws/smithy-go/encoding/json\ngithub.com/aws/smithy-go/encoding/xml\ngithub.com/aws/smithy-go/endpoints\ngithub.com/aws/smithy-go/internal/sync/singleflight\ngithub.com/aws/smithy-go/io\ngithub.com/aws/smithy-go/logging\ngithub.com/aws/smithy-go/middleware\ngithub.com/aws/smithy-go/private/requestcompression\ngithub.com/aws/smithy-go/ptr\ngithub.com/aws/smithy-go/rand\ngithub.com/aws/smithy-go/time\ngithub.com/aws/smithy-go/transport/http\ngithub.com/aws/smithy-go/transport/http/internal/io\ngithub.com/aws/smithy-go/waiter\n# github.com/aymerick/douceur v0.2.0\n## explicit\ngithub.com/aymerick/douceur/css\ngithub.com/aymerick/douceur/parser\n# github.com/bits-and-blooms/bitset v1.13.0\n## explicit; go 1.16\ngithub.com/bits-and-blooms/bitset\n# github.com/coder/websocket v1.8.12\n## explicit; go 1.19\ngithub.com/coder/websocket\ngithub.com/coder/websocket/internal/bpool\ngithub.com/coder/websocket/internal/errd\ngithub.com/coder/websocket/internal/util\ngithub.com/coder/websocket/internal/wsjs\ngithub.com/coder/websocket/internal/xsync\n# github.com/coreos/go-iptables v0.7.1-0.20240112124308-65c67c9f46e6\n## explicit; go 1.16\ngithub.com/coreos/go-iptables/iptables\n# github.com/dblohm7/wingoes v0.0.0-20240119213807-a09d6be7affa\n## explicit; go 1.21\ngithub.com/dblohm7/wingoes\ngithub.com/dblohm7/wingoes/com\ngithub.com/dblohm7/wingoes/com/automation\ngithub.com/dblohm7/wingoes/internal\ngithub.com/dblohm7/wingoes/pe\n# github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e\n## explicit\ngithub.com/digitalocean/go-smbios/smbios\n# github.com/dustin/go-humanize v1.0.1\n## explicit; go 1.16\ngithub.com/dustin/go-humanize\n# github.com/fxamacker/cbor/v2 v2.6.0\n## explicit; go 1.17\ngithub.com/fxamacker/cbor/v2\n# github.com/gaissmai/bart v0.11.1\n## explicit; go 1.21\ngithub.com/gaissmai/bart\n# github.com/go-enry/go-enry/v2 v2.8.4\n## explicit; go 1.14\ngithub.com/go-enry/go-enry/v2\ngithub.com/go-enry/go-enry/v2/data\ngithub.com/go-enry/go-enry/v2/data/rule\ngithub.com/go-enry/go-enry/v2/internal/tokenizer\ngithub.com/go-enry/go-enry/v2/internal/tokenizer/flex\ngithub.com/go-enry/go-enry/v2/regex\n# github.com/go-enry/go-oniguruma v1.2.1\n## explicit; go 1.14\ngithub.com/go-enry/go-oniguruma\n# github.com/go-json-experiment/json v0.0.0-20231102232822-2e55bd4e08b0\n## explicit; go 1.21\ngithub.com/go-json-experiment/json\ngithub.com/go-json-experiment/json/internal\ngithub.com/go-json-experiment/json/internal/jsonflags\ngithub.com/go-json-experiment/json/internal/jsonopts\ngithub.com/go-json-experiment/json/internal/jsonwire\ngithub.com/go-json-experiment/json/jsontext\n# github.com/go-ole/go-ole v1.3.0\n## explicit; go 1.12\ngithub.com/go-ole/go-ole\ngithub.com/go-ole/go-ole/oleutil\n# github.com/godbus/dbus/v5 v5.1.1-0.20230522191255-76236955d466\n## explicit; go 1.12\ngithub.com/godbus/dbus/v5\n# github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da\n## explicit\ngithub.com/golang/groupcache/lru\n# github.com/google/btree v1.1.2\n## explicit; go 1.18\ngithub.com/google/btree\n# github.com/google/go-cmp v0.6.0\n## explicit; go 1.13\ngithub.com/google/go-cmp/cmp\ngithub.com/google/go-cmp/cmp/internal/diff\ngithub.com/google/go-cmp/cmp/internal/flags\ngithub.com/google/go-cmp/cmp/internal/function\ngithub.com/google/go-cmp/cmp/internal/value\n# github.com/google/nftables v0.2.1-0.20240414091927-5e242ec57806\n## explicit; go 1.21\ngithub.com/google/nftables\ngithub.com/google/nftables/alignedbuff\ngithub.com/google/nftables/binaryutil\ngithub.com/google/nftables/expr\ngithub.com/google/nftables/internal/parseexprfunc\ngithub.com/google/nftables/xt\n# github.com/google/uuid v1.6.0\n## explicit\ngithub.com/google/uuid\n# github.com/gorilla/csrf v1.7.2\n## explicit; go 1.20\ngithub.com/gorilla/csrf\n# github.com/gorilla/css v1.0.1\n## explicit; go 1.20\ngithub.com/gorilla/css/scanner\n# github.com/gorilla/securecookie v1.1.2\n## explicit; go 1.20\ngithub.com/gorilla/securecookie\n# github.com/hashicorp/golang-lru/v2 v2.0.7\n## explicit; go 1.18\ngithub.com/hashicorp/golang-lru/v2\ngithub.com/hashicorp/golang-lru/v2/internal\ngithub.com/hashicorp/golang-lru/v2/simplelru\n# github.com/hdevalence/ed25519consensus v0.2.0\n## explicit; go 1.19\ngithub.com/hdevalence/ed25519consensus\n# github.com/illarion/gonotify/v2 v2.0.3\n## explicit; go 1.12\ngithub.com/illarion/gonotify/v2\n# github.com/insomniacslk/dhcp v0.0.0-20231206064809-8c70d406f6d2\n## explicit; go 1.20\ngithub.com/insomniacslk/dhcp/dhcpv4\ngithub.com/insomniacslk/dhcp/iana\ngithub.com/insomniacslk/dhcp/interfaces\ngithub.com/insomniacslk/dhcp/rfc1035label\n# github.com/jmespath/go-jmespath v0.4.0\n## explicit; go 1.14\ngithub.com/jmespath/go-jmespath\n# github.com/josharian/native v1.1.1-0.20230202152459-5c7d0dd6ab86\n## explicit; go 1.13\ngithub.com/josharian/native\n# github.com/jsimonetti/rtnetlink v1.4.0\n## explicit; go 1.20\ngithub.com/jsimonetti/rtnetlink\ngithub.com/jsimonetti/rtnetlink/internal/unix\n# github.com/klauspost/compress v1.17.9\n## explicit; go 1.20\ngithub.com/klauspost/compress\ngithub.com/klauspost/compress/fse\ngithub.com/klauspost/compress/huff0\ngithub.com/klauspost/compress/internal/cpuinfo\ngithub.com/klauspost/compress/internal/snapref\ngithub.com/klauspost/compress/zstd\ngithub.com/klauspost/compress/zstd/internal/xxhash\n# github.com/kortschak/wol v0.0.0-20200729010619-da482cc4850a\n## explicit; go 1.12\ngithub.com/kortschak/wol\n# github.com/mattn/go-isatty v0.0.20\n## explicit; go 1.15\ngithub.com/mattn/go-isatty\n# github.com/mdlayher/genetlink v1.3.2\n## explicit; go 1.18\ngithub.com/mdlayher/genetlink\n# github.com/mdlayher/netlink v1.7.2\n## explicit; go 1.18\ngithub.com/mdlayher/netlink\ngithub.com/mdlayher/netlink/nlenc\ngithub.com/mdlayher/netlink/nltest\n# github.com/mdlayher/sdnotify v1.0.0\n## explicit; go 1.18\ngithub.com/mdlayher/sdnotify\n# github.com/mdlayher/socket v0.5.0\n## explicit; go 1.21\ngithub.com/mdlayher/socket\n# github.com/microcosm-cc/bluemonday v1.0.27\n## explicit; go 1.19\ngithub.com/microcosm-cc/bluemonday\ngithub.com/microcosm-cc/bluemonday/css\n# github.com/miekg/dns v1.1.58\n## explicit; go 1.19\ngithub.com/miekg/dns\n# github.com/mitchellh/go-ps v1.0.0\n## explicit; go 1.13\ngithub.com/mitchellh/go-ps\n# github.com/ncruces/go-strftime v0.1.9\n## explicit; go 1.17\ngithub.com/ncruces/go-strftime\n# github.com/niklasfasching/go-org v1.7.0\n## explicit; go 1.18\ngithub.com/niklasfasching/go-org/org\n# github.com/pierrec/lz4/v4 v4.1.21\n## explicit; go 1.14\ngithub.com/pierrec/lz4/v4\ngithub.com/pierrec/lz4/v4/internal/lz4block\ngithub.com/pierrec/lz4/v4/internal/lz4errors\ngithub.com/pierrec/lz4/v4/internal/lz4stream\ngithub.com/pierrec/lz4/v4/internal/xxh32\n# github.com/prometheus-community/pro-bing v0.4.0\n## explicit; go 1.19\ngithub.com/prometheus-community/pro-bing\n# github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec\n## explicit; go 1.12\ngithub.com/remyoudompheng/bigfft\n# github.com/russross/blackfriday v1.6.0\n## explicit; go 1.13\ngithub.com/russross/blackfriday\n# github.com/safchain/ethtool v0.3.0\n## explicit; go 1.16\ngithub.com/safchain/ethtool\n# github.com/tailscale/certstore v0.1.1-0.20231202035212-d3fa0460f47e\n## explicit; go 1.20\ngithub.com/tailscale/certstore\n# github.com/tailscale/go-winio v0.0.0-20231025203758-c4f33415bf55\n## explicit; go 1.17\ngithub.com/tailscale/go-winio\ngithub.com/tailscale/go-winio/internal/fs\ngithub.com/tailscale/go-winio/internal/socket\ngithub.com/tailscale/go-winio/internal/stringbuffer\ngithub.com/tailscale/go-winio/pkg/guid\n# github.com/tailscale/golang-x-crypto v0.0.0-20240604161659-3fde5e568aa4\n## explicit; go 1.18\ngithub.com/tailscale/golang-x-crypto/acme\ngithub.com/tailscale/golang-x-crypto/internal/poly1305\ngithub.com/tailscale/golang-x-crypto/ssh\ngithub.com/tailscale/golang-x-crypto/ssh/internal/bcrypt_pbkdf\n# github.com/tailscale/goupnp v1.0.1-0.20210804011211-c64d0f06ea05\n## explicit; go 1.16\ngithub.com/tailscale/goupnp\ngithub.com/tailscale/goupnp/dcps/internetgateway2\ngithub.com/tailscale/goupnp/httpu\ngithub.com/tailscale/goupnp/scpd\ngithub.com/tailscale/goupnp/soap\ngithub.com/tailscale/goupnp/ssdp\n# github.com/tailscale/hujson v0.0.0-20221223112325-20486734a56a\n## explicit; go 1.18\ngithub.com/tailscale/hujson\n# github.com/tailscale/netlink v1.1.1-0.20240822203006-4d49adab4de7\n## explicit; go 1.12\ngithub.com/tailscale/netlink\ngithub.com/tailscale/netlink/nl\n# github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4\n## explicit; go 1.18\ngithub.com/tailscale/peercred\n# github.com/tailscale/web-client-prebuilt v0.0.0-20240226180453-5db17b287bf1\n## explicit; go 1.21\ngithub.com/tailscale/web-client-prebuilt\n# github.com/tailscale/wireguard-go v0.0.0-20240905161824-799c1978fafc\n## explicit; go 1.20\ngithub.com/tailscale/wireguard-go/conn\ngithub.com/tailscale/wireguard-go/conn/winrio\ngithub.com/tailscale/wireguard-go/device\ngithub.com/tailscale/wireguard-go/ipc\ngithub.com/tailscale/wireguard-go/ipc/namedpipe\ngithub.com/tailscale/wireguard-go/ratelimiter\ngithub.com/tailscale/wireguard-go/replay\ngithub.com/tailscale/wireguard-go/rwcancel\ngithub.com/tailscale/wireguard-go/tai64n\ngithub.com/tailscale/wireguard-go/tun\n# github.com/tcnksm/go-httpstat v0.2.0\n## explicit\ngithub.com/tcnksm/go-httpstat\n# github.com/u-root/uio v0.0.0-20240118234441-a3c409a6018e\n## explicit; go 1.16\ngithub.com/u-root/uio/rand\ngithub.com/u-root/uio/uio\n# github.com/vishvananda/netns v0.0.4\n## explicit; go 1.17\ngithub.com/vishvananda/netns\n# github.com/x448/float16 v0.8.4\n## explicit; go 1.11\ngithub.com/x448/float16\n# go4.org/mem v0.0.0-20220726221520-4f986261bf13\n## explicit; go 1.14\ngo4.org/mem\n# go4.org/netipx v0.0.0-20231129151722-fdeea329fbba\n## explicit; go 1.18\ngo4.org/netipx\n# golang.org/x/crypto v0.25.0\n## explicit; go 1.20\ngolang.org/x/crypto/argon2\ngolang.org/x/crypto/blake2b\ngolang.org/x/crypto/blake2s\ngolang.org/x/crypto/blowfish\ngolang.org/x/crypto/chacha20\ngolang.org/x/crypto/chacha20poly1305\ngolang.org/x/crypto/curve25519\ngolang.org/x/crypto/hkdf\ngolang.org/x/crypto/internal/alias\ngolang.org/x/crypto/internal/poly1305\ngolang.org/x/crypto/nacl/box\ngolang.org/x/crypto/nacl/secretbox\ngolang.org/x/crypto/poly1305\ngolang.org/x/crypto/salsa20/salsa\n# golang.org/x/exp v0.0.0-20240119083558-1b970713d09a\n## explicit; go 1.20\ngolang.org/x/exp/constraints\ngolang.org/x/exp/maps\n# golang.org/x/mod v0.19.0\n## explicit; go 1.18\ngolang.org/x/mod/semver\n# golang.org/x/net v0.27.0\n## explicit; go 1.18\ngolang.org/x/net/bpf\ngolang.org/x/net/dns/dnsmessage\ngolang.org/x/net/html\ngolang.org/x/net/html/atom\ngolang.org/x/net/http/httpguts\ngolang.org/x/net/http/httpproxy\ngolang.org/x/net/http2\ngolang.org/x/net/http2/h2c\ngolang.org/x/net/http2/hpack\ngolang.org/x/net/icmp\ngolang.org/x/net/idna\ngolang.org/x/net/internal/iana\ngolang.org/x/net/internal/socket\ngolang.org/x/net/internal/socks\ngolang.org/x/net/ipv4\ngolang.org/x/net/ipv6\ngolang.org/x/net/proxy\ngolang.org/x/net/route\n# golang.org/x/sync v0.7.0\n## explicit; go 1.18\ngolang.org/x/sync/errgroup\n# golang.org/x/sys v0.22.0\n## explicit; go 1.18\ngolang.org/x/sys/cpu\ngolang.org/x/sys/plan9\ngolang.org/x/sys/unix\ngolang.org/x/sys/windows\ngolang.org/x/sys/windows/registry\ngolang.org/x/sys/windows/svc\ngolang.org/x/sys/windows/svc/mgr\n# golang.org/x/term v0.22.0\n## explicit; go 1.18\ngolang.org/x/term\n# golang.org/x/text v0.16.0\n## explicit; go 1.18\ngolang.org/x/text/secure/bidirule\ngolang.org/x/text/transform\ngolang.org/x/text/unicode/bidi\ngolang.org/x/text/unicode/norm\n# golang.org/x/time v0.5.0\n## explicit; go 1.18\ngolang.org/x/time/rate\n# golang.org/x/tools v0.23.0\n## explicit; go 1.19\ngolang.org/x/tools/go/gcexportdata\ngolang.org/x/tools/go/packages\ngolang.org/x/tools/go/types/objectpath\ngolang.org/x/tools/internal/aliases\ngolang.org/x/tools/internal/event\ngolang.org/x/tools/internal/event/core\ngolang.org/x/tools/internal/event/keys\ngolang.org/x/tools/internal/event/label\ngolang.org/x/tools/internal/gcimporter\ngolang.org/x/tools/internal/gocommand\ngolang.org/x/tools/internal/packagesinternal\ngolang.org/x/tools/internal/pkgbits\ngolang.org/x/tools/internal/stdlib\ngolang.org/x/tools/internal/tokeninternal\ngolang.org/x/tools/internal/typesinternal\ngolang.org/x/tools/internal/versions\n# golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2\n## explicit; go 1.17\ngolang.zx2c4.com/wintun\n# golang.zx2c4.com/wireguard/windows v0.5.3\n## explicit; go 1.18\ngolang.zx2c4.com/wireguard/windows/tunnel/winipcfg\n# gvisor.dev/gvisor v0.0.0-20240722211153-64c016c92987\n## explicit; go 1.22.0\ngvisor.dev/gvisor/pkg/atomicbitops\ngvisor.dev/gvisor/pkg/bits\ngvisor.dev/gvisor/pkg/buffer\ngvisor.dev/gvisor/pkg/context\ngvisor.dev/gvisor/pkg/cpuid\ngvisor.dev/gvisor/pkg/gohacks\ngvisor.dev/gvisor/pkg/goid\ngvisor.dev/gvisor/pkg/linewriter\ngvisor.dev/gvisor/pkg/log\ngvisor.dev/gvisor/pkg/rand\ngvisor.dev/gvisor/pkg/refs\ngvisor.dev/gvisor/pkg/sleep\ngvisor.dev/gvisor/pkg/state\ngvisor.dev/gvisor/pkg/state/wire\ngvisor.dev/gvisor/pkg/sync\ngvisor.dev/gvisor/pkg/sync/locking\ngvisor.dev/gvisor/pkg/tcpip\ngvisor.dev/gvisor/pkg/tcpip/adapters/gonet\ngvisor.dev/gvisor/pkg/tcpip/checksum\ngvisor.dev/gvisor/pkg/tcpip/hash/jenkins\ngvisor.dev/gvisor/pkg/tcpip/header\ngvisor.dev/gvisor/pkg/tcpip/header/parse\ngvisor.dev/gvisor/pkg/tcpip/internal/tcp\ngvisor.dev/gvisor/pkg/tcpip/network/hash\ngvisor.dev/gvisor/pkg/tcpip/network/internal/fragmentation\ngvisor.dev/gvisor/pkg/tcpip/network/internal/ip\ngvisor.dev/gvisor/pkg/tcpip/network/internal/multicast\ngvisor.dev/gvisor/pkg/tcpip/network/ipv4\ngvisor.dev/gvisor/pkg/tcpip/network/ipv6\ngvisor.dev/gvisor/pkg/tcpip/ports\ngvisor.dev/gvisor/pkg/tcpip/seqnum\ngvisor.dev/gvisor/pkg/tcpip/stack\ngvisor.dev/gvisor/pkg/tcpip/stack/gro\ngvisor.dev/gvisor/pkg/tcpip/transport\ngvisor.dev/gvisor/pkg/tcpip/transport/icmp\ngvisor.dev/gvisor/pkg/tcpip/transport/internal/network\ngvisor.dev/gvisor/pkg/tcpip/transport/internal/noop\ngvisor.dev/gvisor/pkg/tcpip/transport/packet\ngvisor.dev/gvisor/pkg/tcpip/transport/raw\ngvisor.dev/gvisor/pkg/tcpip/transport/tcp\ngvisor.dev/gvisor/pkg/tcpip/transport/tcpconntrack\ngvisor.dev/gvisor/pkg/tcpip/transport/udp\ngvisor.dev/gvisor/pkg/waiter\n# modernc.org/gc/v3 v3.0.0-20240304020402-f0dba7c97c2b\n## explicit; go 1.20\nmodernc.org/gc/v3\n# modernc.org/libc v1.55.2\n## explicit; go 1.20\nmodernc.org/libc\nmodernc.org/libc/errno\nmodernc.org/libc/fcntl\nmodernc.org/libc/fts\nmodernc.org/libc/grp\nmodernc.org/libc/honnef.co/go/netdb\nmodernc.org/libc/langinfo\nmodernc.org/libc/limits\nmodernc.org/libc/netdb\nmodernc.org/libc/netinet/in\nmodernc.org/libc/poll\nmodernc.org/libc/pthread\nmodernc.org/libc/pwd\nmodernc.org/libc/signal\nmodernc.org/libc/stdio\nmodernc.org/libc/stdlib\nmodernc.org/libc/sys/socket\nmodernc.org/libc/sys/stat\nmodernc.org/libc/sys/types\nmodernc.org/libc/termios\nmodernc.org/libc/time\nmodernc.org/libc/unistd\nmodernc.org/libc/utime\nmodernc.org/libc/uuid\nmodernc.org/libc/uuid/uuid\nmodernc.org/libc/wctype\n# modernc.org/mathutil v1.6.0\n## explicit; go 1.18\nmodernc.org/mathutil\n# modernc.org/memory v1.8.0\n## explicit; go 1.18\nmodernc.org/memory\n# modernc.org/sqlite v1.30.2\n## explicit; go 1.20\nmodernc.org/sqlite\nmodernc.org/sqlite/lib\n# modernc.org/strutil v1.2.0\n## explicit; go 1.18\nmodernc.org/strutil\n# modernc.org/token v1.1.0\n## explicit\nmodernc.org/token\n# tailscale.com v1.74.1\n## explicit; go 1.23\ntailscale.com\ntailscale.com/appc\ntailscale.com/atomicfile\ntailscale.com/client/tailscale\ntailscale.com/client/tailscale/apitype\ntailscale.com/client/web\ntailscale.com/clientupdate\ntailscale.com/clientupdate/distsign\ntailscale.com/control/controlbase\ntailscale.com/control/controlclient\ntailscale.com/control/controlhttp\ntailscale.com/control/controlknobs\ntailscale.com/derp\ntailscale.com/derp/derphttp\ntailscale.com/disco\ntailscale.com/doctor\ntailscale.com/doctor/ethtool\ntailscale.com/doctor/permissions\ntailscale.com/doctor/routetable\ntailscale.com/drive\ntailscale.com/envknob\ntailscale.com/health\ntailscale.com/health/healthmsg\ntailscale.com/hostinfo\ntailscale.com/internal/noiseconn\ntailscale.com/ipn\ntailscale.com/ipn/conffile\ntailscale.com/ipn/ipnauth\ntailscale.com/ipn/ipnlocal\ntailscale.com/ipn/ipnstate\ntailscale.com/ipn/localapi\ntailscale.com/ipn/policy\ntailscale.com/ipn/store\ntailscale.com/ipn/store/awsstore\ntailscale.com/ipn/store/kubestore\ntailscale.com/ipn/store/mem\ntailscale.com/kube/kubeapi\ntailscale.com/kube/kubeclient\ntailscale.com/kube/kubetypes\ntailscale.com/licenses\ntailscale.com/log/filelogger\ntailscale.com/log/sockstatlog\ntailscale.com/logpolicy\ntailscale.com/logtail\ntailscale.com/logtail/backoff\ntailscale.com/logtail/filch\ntailscale.com/metrics\ntailscale.com/net/captivedetection\ntailscale.com/net/connstats\ntailscale.com/net/dns\ntailscale.com/net/dns/publicdns\ntailscale.com/net/dns/recursive\ntailscale.com/net/dns/resolvconffile\ntailscale.com/net/dns/resolver\ntailscale.com/net/dnscache\ntailscale.com/net/dnsfallback\ntailscale.com/net/flowtrack\ntailscale.com/net/ipset\ntailscale.com/net/memnet\ntailscale.com/net/netaddr\ntailscale.com/net/netcheck\ntailscale.com/net/neterror\ntailscale.com/net/netkernelconf\ntailscale.com/net/netknob\ntailscale.com/net/netmon\ntailscale.com/net/netns\ntailscale.com/net/netstat\ntailscale.com/net/netutil\ntailscale.com/net/packet\ntailscale.com/net/packet/checksum\ntailscale.com/net/ping\ntailscale.com/net/portmapper\ntailscale.com/net/proxymux\ntailscale.com/net/routetable\ntailscale.com/net/socks5\ntailscale.com/net/sockstats\ntailscale.com/net/stun\ntailscale.com/net/tcpinfo\ntailscale.com/net/tlsdial\ntailscale.com/net/tsaddr\ntailscale.com/net/tsdial\ntailscale.com/net/tshttpproxy\ntailscale.com/net/tstun\ntailscale.com/net/wsconn\ntailscale.com/omit\ntailscale.com/paths\ntailscale.com/portlist\ntailscale.com/posture\ntailscale.com/proxymap\ntailscale.com/safesocket\ntailscale.com/syncs\ntailscale.com/tailcfg\ntailscale.com/taildrop\ntailscale.com/tempfork/heap\ntailscale.com/tka\ntailscale.com/tsconst\ntailscale.com/tsd\ntailscale.com/tsnet\ntailscale.com/tstime\ntailscale.com/tstime/mono\ntailscale.com/tstime/rate\ntailscale.com/tsweb/varz\ntailscale.com/types/appctype\ntailscale.com/types/dnstype\ntailscale.com/types/empty\ntailscale.com/types/ipproto\ntailscale.com/types/key\ntailscale.com/types/lazy\ntailscale.com/types/logger\ntailscale.com/types/logid\ntailscale.com/types/netlogtype\ntailscale.com/types/netmap\ntailscale.com/types/nettype\ntailscale.com/types/opt\ntailscale.com/types/persist\ntailscale.com/types/preftype\ntailscale.com/types/ptr\ntailscale.com/types/structs\ntailscale.com/types/tkatype\ntailscale.com/types/views\ntailscale.com/util/cibuild\ntailscale.com/util/clientmetric\ntailscale.com/util/cloudenv\ntailscale.com/util/cmpver\ntailscale.com/util/ctxkey\ntailscale.com/util/deephash\ntailscale.com/util/dirwalk\ntailscale.com/util/dnsname\ntailscale.com/util/execqueue\ntailscale.com/util/goroutines\ntailscale.com/util/groupmember\ntailscale.com/util/hashx\ntailscale.com/util/httphdr\ntailscale.com/util/httpm\ntailscale.com/util/lineread\ntailscale.com/util/linuxfw\ntailscale.com/util/mak\ntailscale.com/util/multierr\ntailscale.com/util/must\ntailscale.com/util/nocasemaps\ntailscale.com/util/osdiag\ntailscale.com/util/osdiag/internal/wsc\ntailscale.com/util/osshare\ntailscale.com/util/osuser\ntailscale.com/util/progresstracking\ntailscale.com/util/race\ntailscale.com/util/racebuild\ntailscale.com/util/rands\ntailscale.com/util/ringbuffer\ntailscale.com/util/set\ntailscale.com/util/singleflight\ntailscale.com/util/slicesx\ntailscale.com/util/syspolicy\ntailscale.com/util/syspolicy/internal\ntailscale.com/util/syspolicy/setting\ntailscale.com/util/sysresources\ntailscale.com/util/systemd\ntailscale.com/util/testenv\ntailscale.com/util/truncate\ntailscale.com/util/uniq\ntailscale.com/util/usermetric\ntailscale.com/util/vizerror\ntailscale.com/util/winutil\ntailscale.com/util/winutil/authenticode\ntailscale.com/util/winutil/gp\ntailscale.com/util/winutil/policy\ntailscale.com/util/winutil/winenv\ntailscale.com/util/zstdframe\ntailscale.com/version\ntailscale.com/version/distro\ntailscale.com/wgengine\ntailscale.com/wgengine/capture\ntailscale.com/wgengine/filter\ntailscale.com/wgengine/filter/filtertype\ntailscale.com/wgengine/magicsock\ntailscale.com/wgengine/netlog\ntailscale.com/wgengine/netstack\ntailscale.com/wgengine/netstack/gro\ntailscale.com/wgengine/router\ntailscale.com/wgengine/wgcfg\ntailscale.com/wgengine/wgcfg/nmcfg\ntailscale.com/wgengine/wgint\ntailscale.com/wgengine/wglog\ntailscale.com/wgengine/winnet\n"
 
 [mod]
   [mod."filippo.io/edwards25519"]
     version = "v1.1.0"
     hash = "sha256-9ACANrgWZSd5HYPfDZHY8DVbPSC9LOMgy8deq3rDOoc="
-  [mod."github.com/Microsoft/go-winio"]
-    version = "v0.6.2"
-    hash = "sha256-tVNWDUMILZbJvarcl/E7tpSnkn7urqgSHa2Eaka5vSU="
   [mod."github.com/akutz/memconn"]
     version = "v0.1.0"
     hash = "sha256-WOs/RQYjQbn41ui8ztHgWSd4jxydE+fvIrl/0dmHD9Y="
@@ -64,9 +62,6 @@ schema = 3
   [mod."github.com/coder/websocket"]
     version = "v1.8.12"
     hash = "sha256-jEaJSKcwmKtXFkvtxwpEdFMdazXZM6bY2u5TGBimklI="
-  [mod."github.com/containerd/stargz-snapshotter/estargz"]
-    version = "v0.15.1"
-    hash = "sha256-yVwNWyOd7/Ov+GBNyOIEPpGGtTq8KOWsnp2z4pU00Bs="
   [mod."github.com/coreos/go-iptables"]
     version = "v0.7.1-0.20240112124308-65c67c9f46e6"
     hash = "sha256-kjnry8ld5Keew5q+tX7GSdGVZaXlehs2Lt+z8Rokhns="
@@ -76,33 +71,9 @@ schema = 3
   [mod."github.com/digitalocean/go-smbios"]
     version = "v0.0.0-20180907143718-390a4f403a8e"
     hash = "sha256-Hgx1ML3rigdYXx5ntnEYD5JEk6kJv1cL0+/GDbnPkbo="
-  [mod."github.com/distribution/reference"]
-    version = "v0.6.0"
-    hash = "sha256-gr4tL+qz4jKyAtl8LINcxMSanztdt+pybj1T+2ulQv4="
-  [mod."github.com/docker/cli"]
-    version = "v27.1.1+incompatible"
-    hash = "sha256-Sb+qN6LpG5iHtWvp3KxggBwsEbF8GoWVq+Ss5bf7sqE="
-  [mod."github.com/docker/distribution"]
-    version = "v2.8.3+incompatible"
-    hash = "sha256-XhRURCGNpJC83QZTtgCxHHFL76HaxIxjt70HwUa847E="
-  [mod."github.com/docker/docker"]
-    version = "v27.1.1+incompatible"
-    hash = "sha256-w+wyGRGE0BEl4mou8MLy8QWvPcwJfvgTslTFzSEOpaY="
-  [mod."github.com/docker/docker-credential-helpers"]
-    version = "v0.8.2"
-    hash = "sha256-AmCyOKd6Xvz0BUZchGSJdbPolprne/pAmCr2UoXXRBE="
-  [mod."github.com/docker/go-connections"]
-    version = "v0.5.0"
-    hash = "sha256-aGbMRrguh98DupIHgcpLkVUZpwycx1noQXbtTl5Sbms="
-  [mod."github.com/docker/go-units"]
-    version = "v0.5.0"
-    hash = "sha256-iK/V/jJc+borzqMeqLY+38Qcts2KhywpsTk95++hImE="
   [mod."github.com/dustin/go-humanize"]
     version = "v1.0.1"
     hash = "sha256-yuvxYYngpfVkUg9yAmG99IUVmADTQA0tMbBXe0Fq0Mc="
-  [mod."github.com/felixge/httpsnoop"]
-    version = "v1.0.4"
-    hash = "sha256-c1JKoRSndwwOyOxq9ddCe+8qn7mG9uRq2o/822x5O/c="
   [mod."github.com/fxamacker/cbor/v2"]
     version = "v2.6.0"
     hash = "sha256-8EMjmc2FYVb0OXuzU1FWkSqYEtJjYdIT2PWsChoiTyQ="
@@ -118,21 +89,12 @@ schema = 3
   [mod."github.com/go-json-experiment/json"]
     version = "v0.0.0-20231102232822-2e55bd4e08b0"
     hash = "sha256-ltOLec3r0dGA/k1TTrQjuMuHxdxBlALkfLbdKuUNvmg="
-  [mod."github.com/go-logr/logr"]
-    version = "v1.4.2"
-    hash = "sha256-/W6qGilFlZNTb9Uq48xGZ4IbsVeSwJiAMLw4wiNYHLI="
-  [mod."github.com/go-logr/stdr"]
-    version = "v1.2.2"
-    hash = "sha256-rRweAP7XIb4egtT1f2gkz4sYOu7LDHmcJ5iNsJUd0sE="
   [mod."github.com/go-ole/go-ole"]
     version = "v1.3.0"
     hash = "sha256-tF8t3VcV71jQ4jbPL91BwR59AKDpUAFV1waIKzkXJu8="
   [mod."github.com/godbus/dbus/v5"]
     version = "v5.1.1-0.20230522191255-76236955d466"
     hash = "sha256-OdcyeoGQ4xWUpl21WKXkbAm8yZHMDp8giY02arupjb4="
-  [mod."github.com/gogo/protobuf"]
-    version = "v1.3.2"
-    hash = "sha256-pogILFrrk+cAtb0ulqn9+gRZJ7sGnnLLdtqITvxvG6c="
   [mod."github.com/golang/groupcache"]
     version = "v0.0.0-20210331224755-41bb18bfe9da"
     hash = "sha256-7Gs7CS9gEYZkbu5P4hqPGBpeGZWC64VDwraSKFF+VR0="
@@ -142,9 +104,6 @@ schema = 3
   [mod."github.com/google/go-cmp"]
     version = "v0.6.0"
     hash = "sha256-qgra5jze4iPGP0JSTVeY5qV5AvEnEu39LYAuUCIkMtg="
-  [mod."github.com/google/go-containerregistry"]
-    version = "v0.20.1"
-    hash = "sha256-U/SIeX/2X8ATNBP0gvK5J97srlC/91aSzcLD+hLbPpE="
   [mod."github.com/google/nftables"]
     version = "v0.2.1-0.20240414091927-5e242ec57806"
     hash = "sha256-OXMzx4Exf++E4UzCUE1gw3TOrfyI187cFu3cDZ9ifKU="
@@ -166,9 +125,9 @@ schema = 3
   [mod."github.com/hdevalence/ed25519consensus"]
     version = "v0.2.0"
     hash = "sha256-KTbeKMOT/HCJjDHqyciQjJPPgpNk6H0VyQCCbeGgs7Y="
-  [mod."github.com/illarion/gonotify"]
-    version = "v1.0.1"
-    hash = "sha256-73KDUfk5iNo12u+nNN2H4UTfJ1FlLifahnFNPzV1P/k="
+  [mod."github.com/illarion/gonotify/v2"]
+    version = "v2.0.3"
+    hash = "sha256-xLtI9dcSiG2Je+Nxi6PWtTa+KF7AtPI2gD+mKfC0fgI="
   [mod."github.com/insomniacslk/dhcp"]
     version = "v0.0.0-20231206064809-8c70d406f6d2"
     hash = "sha256-PHiso7HGNjCGbGdZ7TMGnSGzPDUTpvWpqAccoKPAaWM="
@@ -208,33 +167,18 @@ schema = 3
   [mod."github.com/miekg/dns"]
     version = "v1.1.58"
     hash = "sha256-UGvyC1Abh2S5VaAUCV9AUuDMrCvpiWQy/UnYM9DfIB8="
-  [mod."github.com/mitchellh/go-homedir"]
-    version = "v1.1.0"
-    hash = "sha256-oduBKXHAQG8X6aqLEpqZHs5DOKe84u6WkBwi4W6cv3k="
   [mod."github.com/mitchellh/go-ps"]
     version = "v1.0.0"
     hash = "sha256-HzxVHNLHZpnsBuPcub0G+9jjDcDOsxM/6wifbsxf7EY="
-  [mod."github.com/moby/docker-image-spec"]
-    version = "v1.3.1"
-    hash = "sha256-xwSNLmMagzywdGJIuhrWl1r7cIWBYCOMNYbuDDT6Jhs="
   [mod."github.com/ncruces/go-strftime"]
     version = "v0.1.9"
     hash = "sha256-T0iw+UEckzueWHT88PkTnZZixyKCEa+DTLzIiiohuWY="
   [mod."github.com/niklasfasching/go-org"]
     version = "v1.7.0"
     hash = "sha256-i3NdcfER5JSIJv3GIJxeNJJpOyxiyxQKPZPpK2teQt4="
-  [mod."github.com/opencontainers/go-digest"]
-    version = "v1.0.0"
-    hash = "sha256-cfVDjHyWItmUGZ2dzQhCHgmOmou8v7N+itDkLZVkqkQ="
-  [mod."github.com/opencontainers/image-spec"]
-    version = "v1.1.0"
-    hash = "sha256-5OxW1ShHypLpzVu+BJivNlFX2JFPh9WKfJcMIgPZf4U="
   [mod."github.com/pierrec/lz4/v4"]
     version = "v4.1.21"
     hash = "sha256-u47Lm4tN2ChGDLGyR+Jpi/Mi0bOFBVT6PTpPFdu2rMU="
-  [mod."github.com/pkg/errors"]
-    version = "v0.9.1"
-    hash = "sha256-mNfQtcrQmu3sNg/7IwiieKWOgFQOVVe2yXgKBpe/wZw="
   [mod."github.com/prometheus-community/pro-bing"]
     version = "v0.4.0"
     hash = "sha256-3TH0wB85OITw3uzTcEva2EcEF6jNf98sAoSOsnL2G9g="
@@ -247,9 +191,6 @@ schema = 3
   [mod."github.com/safchain/ethtool"]
     version = "v0.3.0"
     hash = "sha256-q5bQGHB7cyEejA9tQkrhpvzpfYRvXcmClbWBgfs3Ymc="
-  [mod."github.com/sirupsen/logrus"]
-    version = "v1.9.3"
-    hash = "sha256-EnxsWdEUPYid+aZ9H4/iMTs1XMvCLbXZRDyvj89Ebms="
   [mod."github.com/tailscale/certstore"]
     version = "v0.1.1-0.20231202035212-d3fa0460f47e"
     hash = "sha256-Q0HLTQPRsIizRqvdBBaLGoLascQiSpQm+X3NW3ytpDQ="
@@ -265,12 +206,9 @@ schema = 3
   [mod."github.com/tailscale/hujson"]
     version = "v0.0.0-20221223112325-20486734a56a"
     hash = "sha256-q9c2IjwbL0IgYPznVpQP1XT/8lrzH1niI3E+wjNcf5Y="
-  [mod."github.com/tailscale/mkctr"]
-    version = "v0.0.0-20240730144311-42e5cb39d30b"
-    hash = "sha256-MN47+aiJXqzAir3hhCKgY7OAys/ZLFi3OKkwH/wgFco="
   [mod."github.com/tailscale/netlink"]
-    version = "v1.1.1-0.20211101221916-cabfb018fe85"
-    hash = "sha256-bMK5qqObMcxIbPy5XhOZP8TGDaXvDAHsE0FR68VMLi8="
+    version = "v1.1.1-0.20240822203006-4d49adab4de7"
+    hash = "sha256-ldPNC6TF8kY2OIHZvOPHcJLJrepTXZGP4wnxOq0rxH0="
   [mod."github.com/tailscale/peercred"]
     version = "v0.0.0-20240214030740-b535050b2aa4"
     hash = "sha256-82cdwvTUr47qMP2MHiMdY5O8vr/hA2aJ/KW2VTu97KI="
@@ -278,38 +216,20 @@ schema = 3
     version = "v0.0.0-20240226180453-5db17b287bf1"
     hash = "sha256-iE8PCr0At4P75cG7dDa6fwhARJUIUw9pwvgtQNMOjAA="
   [mod."github.com/tailscale/wireguard-go"]
-    version = "v0.0.0-20240731203015-71393c576b98"
-    hash = "sha256-AwaqXLIKa9TtyZJbAYwojPRC4p9NWxhk2GdQp/z6Khc="
+    version = "v0.0.0-20240905161824-799c1978fafc"
+    hash = "sha256-mMUGPBp5A15QjMW2zhVuu80htQ3ic52wML0Eir0mzHQ="
   [mod."github.com/tcnksm/go-httpstat"]
     version = "v0.2.0"
     hash = "sha256-bCWn8E+DcZY6+yPu07AF3hCcDZx3CFdD74qfpDIgVqI="
   [mod."github.com/u-root/uio"]
     version = "v0.0.0-20240118234441-a3c409a6018e"
     hash = "sha256-rUjQMG+HprbgHKzrIPFrQ6S3BCEyYQyUbA/D72mY8iU="
-  [mod."github.com/vbatts/tar-split"]
-    version = "v0.11.5"
-    hash = "sha256-kVD5X4eDO5fcLSUgWJcaa1iVBMcwjLpyb5KMKBuovcY="
-  [mod."github.com/vishvananda/netlink"]
-    version = "v1.2.1-beta.2"
-    hash = "sha256-ePReedgYT0KuAx/HOUgG76zDZ2XpW/u8bGlsWysxKzE="
   [mod."github.com/vishvananda/netns"]
     version = "v0.0.4"
     hash = "sha256-tEba2cxyk3GdCYvEIttQ8aZCzHcB0ZiUt6fUEARDkWU="
   [mod."github.com/x448/float16"]
     version = "v0.8.4"
     hash = "sha256-VKzMTMS9pIB/cwe17xPftCSK9Mf4Y6EuBEJlB4by5mE="
-  [mod."go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"]
-    version = "v0.53.0"
-    hash = "sha256-B7LSUQARnc4mpFjHj4jvJJh/rBAHGtKm1p+qFib+Pqk="
-  [mod."go.opentelemetry.io/otel"]
-    version = "v1.28.0"
-    hash = "sha256-bilBBr2cuADs9bQ7swnGLTuC7h0DooU6BQtrQqMqIjs="
-  [mod."go.opentelemetry.io/otel/metric"]
-    version = "v1.28.0"
-    hash = "sha256-k3p1lYcvrODwIkZo/j2jvCoDFUelz4yVJEEVdUKUmGU="
-  [mod."go.opentelemetry.io/otel/trace"]
-    version = "v1.28.0"
-    hash = "sha256-8uxmlm0/5VGoWegxwy0q8NgeY+pyicSoV08RkvD9Q98="
   [mod."go4.org/mem"]
     version = "v0.0.0-20220726221520-4f986261bf13"
     hash = "sha256-H2Fsuvzbqp/6JKzC03XPTQTSQBcGs+B5VGsBjrQDY3c="
@@ -377,5 +297,5 @@ schema = 3
     version = "v1.1.0"
     hash = "sha256-m8WyXJ9Mdw6B43wmy2+3HE7zHEi9ocBrhwe/eq+zdu8="
   [mod."tailscale.com"]
-    version = "v1.72.0"
-    hash = "sha256-qI2iB5SwHaZ5XFoSVo6zxQ70vlxbtfi1ARDP46GcKuY="
+    version = "v1.74.1"
+    hash = "sha256-StY9PC/tCIwCFi0Qpwoi/Wu07xM4YFcwlc+Y2uMv3dY="
