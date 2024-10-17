@@ -5,14 +5,9 @@
     nixpkgs.url = "nixpkgs/nixos-unstable";
     utils.url = "github:numtide/flake-utils";
 
-    gomod2nix = {
-      url = "github:obreitwi/gomod2nix/fix/go_mod_vendor";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "utils";
-    };
   };
 
-  outputs = { self, nixpkgs, utils, gomod2nix }:
+  outputs = { self, nixpkgs, utils }:
     utils.lib.eachSystem [
       "x86_64-linux"
       "aarch64-linux"
@@ -20,31 +15,32 @@
       "aarch64-darwin"
     ] (system:
       let
-      graft = pkgs: pkg: pkg.override {
-        buildGoModule = pkgs.buildGo123Module;
-      };
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ gomod2nix.overlays.default (final: prev: {
-            go = prev.go_1_23;
-            go-tools = graft prev prev.go-tools;
-            gotools = graft prev prev.gotools;
-            gopls = graft prev prev.gopls;
-          }) ];
-        };
+      # graft = pkgs: pkg: pkg.override {
+      #   buildGoModule = pkgs.buildGo123Module;
+      # };
+      #   pkgs = import nixpkgs {
+      #     inherit system;
+          # overlays = [ gomod2nix.overlays.default (final: prev: {
+          #   go = prev.go_1_23;
+          #   go-tools = graft prev prev.go-tools;
+          #   gotools = graft prev prev.gotools;
+          #   gopls = graft prev prev.gopls;
+          # }) ];
+        # };
         version = builtins.substring 0 8 self.lastModifiedDate;
+        pkgs = import nixpkgs { inherit system; };
       in {
         packages = rec {
-          tclipd = pkgs.buildGoApplication {
+          tclipd = pkgs.buildGo123Module {
             pname = "tclipd";
             version = "0.1.0-${version}";
             go = pkgs.go;
             src = ./.;
             subPackages = "cmd/tclipd";
-            modules = ./gomod2nix.toml;
+            vendorHash = "";
           };
 
-          tclip = pkgs.buildGoApplication {
+          tclip = pkgs.buildGo123Module {
             pname = "tclip";
             inherit (tclipd) src version modules;
             subPackages = "cmd/tclip";
@@ -90,7 +86,6 @@
             gopls
             gotools
             go-tools
-            gomod2nix.packages.${system}.default
             sqlite-interactive
 
             yarn

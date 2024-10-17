@@ -1,29 +1,5 @@
 {
   "nodes": {
-    "gomod2nix": {
-      "inputs": {
-        "flake-utils": [
-          "utils"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1725226629,
-        "narHash": "sha256-0l5gtNAf3408INFPbvbMvHghd44LgKhMuqUcY6vH5N8=",
-        "owner": "obreitwi",
-        "repo": "gomod2nix",
-        "rev": "983228366edc1bed1be6e6f7a45e285b4707b9ba",
-        "type": "github"
-      },
-      "original": {
-        "owner": "obreitwi",
-        "ref": "fix/go_mod_vendor",
-        "repo": "gomod2nix",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1725432240,
@@ -41,7 +17,6 @@
     },
     "root": {
       "inputs": {
-        "gomod2nix": "gomod2nix",
         "nixpkgs": "nixpkgs",
         "utils": "utils"
       }
