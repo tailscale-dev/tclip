@@ -29,8 +29,8 @@ nix build .#tclipd
 The docker image:
 
 ```
-nix build .#docker
-docker load < ./result
+nix develop --command -- mkctr --gopaths="./cmd/tclipd:/bin/tclipd" --tags="latest" --base="gcr.io/distroless/static" --repos=tclip --ldflags="-w -s" --target=local --push  -- /bin/tclipd
+docker run tclip
 ```
 
 The portable service image:

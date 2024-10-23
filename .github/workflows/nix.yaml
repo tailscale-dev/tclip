@@ -20,7 +20,7 @@ jobs:
         nix build .#tclip .#tclipd
     - name: "Docker image build (dry run)"
       run: |
-        nix develop --command go run github.com/tailscale/mkctr --gopaths="./cmd/tclipd:/bin/tclipd" --tags="latest" --base="gcr.io/distroless/static" --repos=ghcr.io/tailscale-dev/tclip --ldflags="-w -s" -- /bin/tclipd
+        nix develop --command -- mkctr --gopaths="./cmd/tclipd:/bin/tclipd" --tags="latest" --base="gcr.io/distroless/static" --repos=ghcr.io/tailscale-dev/tclip --ldflags="-w -s" -- /bin/tclipd
     - name: "docker login"
       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       if: "github.event_name == 'push' && github.ref_name == 'main'"
@@ -31,7 +31,7 @@ jobs:
     - name: "Docker image push"
       if: "github.event_name == 'push' && github.ref_name == 'main'"
       run: |
-        nix develop --command go run github.com/tailscale/mkctr --gopaths="./cmd/tclipd:/bin/tclipd" --tags="latest" --base="gcr.io/distroless/static" --repos=ghcr.io/tailscale-dev/tclip --push --ldflags="-w -s" -- /bin/tclipd
+        nix develop --command -- mkctr --gopaths="./cmd/tclipd:/bin/tclipd" --tags="latest" --base="gcr.io/distroless/static" --repos=ghcr.io/tailscale-dev/tclip --push --ldflags="-w -s" -- /bin/tclipd
     - name: "Portable service build"
       run: |
         nix build .#portable-service
@@ -41,4 +41,3 @@ jobs:
       with:
         name: portable-service
         path: ./var/*.raw
-      
