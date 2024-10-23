@@ -17,18 +17,6 @@
       "x86_64-darwin"
       "aarch64-darwin"
     ] (system: let
-      # graft = pkgs: pkg: pkg.override {
-      #   buildGoModule = pkgs.buildGo123Module;
-      # };
-      #   pkgs = import nixpkgs {
-      #     inherit system;
-      # overlays = [ gomod2nix.overlays.default (final: prev: {
-      #   go = prev.go_1_23;
-      #   go-tools = graft prev prev.go-tools;
-      #   gotools = graft prev prev.gotools;
-      #   gopls = graft prev prev.gopls;
-      # }) ];
-      # };
       version = builtins.substring 0 8 self.lastModifiedDate;
       pkgs = import nixpkgs {inherit system;};
     in {
@@ -46,16 +34,9 @@
           pname = "tclip";
           inherit (tclipd) src version vendorHash;
           subPackages = "cmd/tclip";
-          go = pkgs.go;
+          inherit (pkgs) go;
           CGO_ENABLED = "0";
         };
-
-        # docker = pkgs.dockerTools.buildLayeredImage {
-        #   name = "ghcr.io/tailscale-dev/tclip";
-        #   tag = "latest";
-        #   config.Cmd = [ "${tclipd}/bin/tclipd" ];
-        #   contents = [ pkgs.cacert ];
-        # };
 
         portable-service = let
           web-service = pkgs.substituteAll {
@@ -95,6 +76,17 @@
 
           yarn
           nodejs
+          (pkgs.buildGo123Module rec {
+            name = "mkctr";
+            src = pkgs.fetchFromGitHub {
+              owner = "tailscale";
+              repo = "mkctr";
+              rev = "42e5cb39d30bc804bd9a0071095cbd5de78e54f8";
+              sha256 = "sha256-MN47+aiJXqzAir3hhCKgY7OAys/ZLFi3OKkwH/wgFco=";
+            };
+
+            vendorHash = "sha256-nIoe79dZwrFqrYLVfqASQDDjG1x0GmZpxDpnEdfny8k=";
+          })
         ];
 
         TSNET_HOSTNAME = "paste-devel";
