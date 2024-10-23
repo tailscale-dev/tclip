@@ -224,6 +224,7 @@ golang.org/x/exp v0.0.0-20240119083558-1b970713d09a h1:Q8/wZp0KX97QFTc2ywcOE0YRj
 golang.org/x/exp v0.0.0-20240119083558-1b970713d09a/go.mod h1:idGWGoKP1toJGkd5/ig9ZLuPcZBC3ewk7SzmH0uou08=
 golang.org/x/exp/typeparams v0.0.0-20240119083558-1b970713d09a h1:8qmSSA8Gz/1kTrCe0nqR0R3Gb/NDhykzWw2q2mWZydM=
 golang.org/x/exp/typeparams v0.0.0-20240119083558-1b970713d09a/go.mod h1:AbB0pIl9nAr9wVwH+Z2ZpaocVmF5I4GyWCDIsVjR0bk=
+golang.org/x/exp/typeparams v0.0.0-20240314144324-c7f7c6466f7f h1:phY1HzDcf18Aq9A8KkmRtY9WvOFIxN8wgfvy6Zm1DV8=
 golang.org/x/image v0.18.0 h1:jGzIakQa/ZXI1I0Fxvaa9W7yP25TqT6cHIHn+6CqvSQ=
 golang.org/x/image v0.18.0/go.mod h1:4yyo5vMFQjVjUcVk4jEQcU9MGy/rulF5WvUILseCM2E=
 golang.org/x/mod v0.19.0 h1:fEdghXQSo20giMthA7cd28ZC+jts4amQ3YMXiP5oMQ8=
@@ -297,3 +298,5 @@ software.sslmate.com/src/go-pkcs12 v0.4.0 h1:H2g08FrTvSFKUj+D309j1DPfk5APnIdAQAB
 software.sslmate.com/src/go-pkcs12 v0.4.0/go.mod h1:Qiz0EyvDRJjjxGyUQa2cCNZn/wMyzrRJ/qcDXOQazLI=
 tailscale.com v1.74.1 h1:qhhkN+0gFZasczi+0n0eBxwfP/ZaUr+05cWdsOQ3GT0=
 tailscale.com v1.74.1/go.mod h1:3iACpCONQ4lauDXvwfoGlwNCpfbVxjdc2j6G9EuFOW8=
+tailscale.com v1.76.3 h1:UBfYxqgsSAjutLix2doZBfTw8bBuE7Cj1DzsREow1wA=
+tailscale.com v1.76.3/go.mod h1:myCwmhYBvMCF/5OgBYuIW42zscuEo30bAml7wABVZLk=

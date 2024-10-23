@@ -27,7 +27,7 @@
           inherit (pkgs) go;
           src = ./.;
           subPackages = "cmd/tclipd";
-          vendorHash = "sha256-x7dgVkvhfOIdsjtJzMYcD2RmMO1FSpRDW+Tx7DPXyrI=";
+          vendorHash = "sha256-Al6UxRE4zsFgaKUZoczR8xhXtGEKrkBR3FforOt+a20=";
         };
 
         tclip = pkgs.buildGo123Module {

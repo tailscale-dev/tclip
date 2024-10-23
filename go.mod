@@ -1,8 +1,8 @@
 module github.com/tailscale-dev/tclip
 
-go 1.23
+go 1.23.1
 
-toolchain go1.23.0
+toolchain go1.23.2
 
 require (
 	github.com/go-enry/go-enry/v2 v2.8.4
@@ -11,7 +11,7 @@ require (
 	github.com/niklasfasching/go-org v1.7.0
 	github.com/russross/blackfriday v1.6.0
 	modernc.org/sqlite v1.30.2
-	tailscale.com v1.74.1
+	tailscale.com v1.76.3
 )
 
 require (
