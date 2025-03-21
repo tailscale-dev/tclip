@@ -2,10 +2,10 @@
 
 <ul class="list-disc ml-5">
     {{range .Pastes}}
-    <li><a class="font-semibold underline text-gray-900 hover:text-gray-500" href="/paste/{{.ID}}">{{.Filename}}</a> - {{.CreatedAt}} - {{.PasterDisplayName}}</li>
+    <li class="dark:text-gray-200"><a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/paste/{{.ID}}">{{.Filename}}</a> - {{.CreatedAt}} - {{.PasterDisplayName}}</li>
     {{end}}
 </ul>
 
-<p>{{if .Prev}}<a href="/paste/list?page={{.Prev}}">Prev</a> - {{end}} Page {{.Page}} {{if .Next}} - <a href="/paste/list?page={{.Next}}">Next</a>{{end}}</p>
+<p class="dark:text-gray-200 pt-5">{{if .Prev}}<a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/paste/list?page={{.Prev}}">Prev</a> - {{end}} Page {{.Page}} {{if .Next}} - <a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/paste/list?page={{.Next}}">Next</a>{{end}}</p>
 
 {{template "footer" .}}
