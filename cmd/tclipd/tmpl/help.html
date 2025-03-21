@@ -1,64 +1,110 @@
 {{template "header" .}}
+
 <div class="prose dark:prose-invert">
-<p>Never seen this service before? Want to know how to use it? This page will help you learn more about your tailnet's pastebin tool.</p>
+    <p>
+        Never seen this service before? Want to know how to use it? This page will help you learn more about your
+        tailnet's pastebin tool.
+    </p>
 
-<ul class="dark:marker:text-gray-300 marker:text-gray-700">
-    <li><a class="hover:text-gray-500" href="#cli">Command-line tool</a></li>
-    <li><a class="hover:text-gray-500" href="#api">API</a>
-        <ul>
-            <li><a class="hover:text-gray-500" href="#emacs">Emacs package</a></li>
-        </ul>
-    </li>
-</ul>
+    <ul class="dark:marker:text-gray-300 marker:text-gray-700">
+        <li><a class="hover:text-gray-500" href="#cli">Command-line tool</a></li>
 
-<h2 id="cli">Command-line tool</h2>
+        <li>
+            <a class="hover:text-gray-500" href="#api">API</a>
+            <ul>
+                <li><a class="hover:text-gray-500" href="#emacs">Emacs package</a></li>
+            </ul>
+        </li>
+    </ul>
 
-<p>You can pipe commands or paste files to the pastebin using the command <code>tclip</code>. You can install it by installing the <a class="hover:text-gray-500" href="https://go.dev">Go</a> compiler toolkit and then running this command:</p>
+    <h2 id="cli">Command-line tool</h2>
 
-<pre><code>go install github.com/tailscale-dev/tclip/cmd/tclip@main</code></pre>
+    <p>
+        You can pipe commands or paste files to the pastebin using the command <code>tclip</code>.
 
-<p>Once it is installed, invoke it with the command <code>tclip</code>:</p>
+        You can install it by installing the <a class="hover:text-gray-500" href="https://go.dev">Go</a> compiler
+        toolkit and then running this command:
+    </p>
 
-<pre><code>tclip ./foo.txt</code></pre>
+    <pre><code>go install github.com/tailscale-dev/tclip/cmd/tclip@main</code></pre>
 
-<p>and the program will print a URL that you can share with your team. You can also pipe the output from any command to it:</p>
+    <p>Once it is installed, invoke it with the command <code>tclip</code>:</p>
 
-<pre><code>go test &amp;2&lt;1 | tclip -n go-test.txt</code></pre>
+    <pre><code>tclip ./foo.txt</code></pre>
 
-<h2 id="api">API</h2>
+    <p>
+        and the program will print a URL that you can share with your team. You can also pipe the output from any
+        command to it:
+    </p>
 
-<p>The pastebin service has an API call at <code>/api/post</code> that you can use to submit new pastes from command-line tools or your text editor. You use it by constructing either a basic HTML form post or a multipart form with these fields (both are required):</p>
+    <pre><code>go test &amp;2&lt;1 | tclip -n go-test.txt</code></pre>
 
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td><code>filename</code></td>
-        <td>The name of the file you want to paste.<br />The file extension of the name will determine the syntax highlighting for that paste.</td>
-    </tr>
-    <tr>
-        <td><code>content</code></td>
-        <td>The literal content of the paste.<br />This can be a function, a bit of prose, or an entire buffer of text.</td>
-    </tr>
-</table>
+    <h2 id="api">API</h2>
 
-<p>The <code>Accept</code> header will determine what kind of response you get. By default, this service will return a redirect to the paste upon pastes being successfully created. If you do not want this behavior (such as if you are implementing support for your favorite text editor or testing with <code>curl</code>), set the <code>Accept</code> header to the value <code>text/plain</code>. This will make the server return the paste URL as normal text.</p>
+    <p>
+        The pastebin service has an API call at <code>/api/post</code> that you can use to submit new pastes from
+        command-line tools or your text editor. You use it by constructing either a basic HTML form post or a multipart
+        form with these fields (both are required):
+    </p>
 
-<p>Here is an example curl command you can use to paste data to the service:</p>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
 
-<pre><code>curl http://paste/api/post -F filename=filename.txt -F content="test paste from curl" -H "Accept: text/plain"</code></pre>
+        <tr>
+            <td><code>filename</code></td>
+            <td>The name of the file you want to paste.<br />The file extension of the name will determine the syntax
+                highlighting for that paste.</td>
+        </tr>
 
-<h3 id="emacs">Emacs package</h3>
+        <tr>
+            <td><code>content</code></td>
+            <td>The literal content of the paste.<br />This can be a function, a bit of prose, or an entire buffer of
+                text.</td>
+        </tr>
+    </table>
 
-<p>The default distribution of tclip ships with a package for <a class="hover:text-gray-500" href="https://www.gnu.org/software/emacs/">GNU Emacs</a>. This package will let you submit pastes from your editor. It requires the <a class="hover:text-gray-500" href="https://github.com/tkf/emacs-request"><code>request</code></a> package and exposes two interactive functions:</p>
+    <p>
+        The <code>Accept</code> header will determine what kind of response you get.
 
-<ul class="dark:marker:text-gray-300 marker:text-gray-700">
-    <li><code>M-x tclip-submit-region</code> - submits the currently highlighted region to tclip</li>
-    <li><code>M-x tclip-submit-buffer</code> - submits the contents of the current buffer to tclip</li>
-</ul>
+        By default, this service will return a redirect to the paste upon pastes being successfully created.
 
-<p>You can download this package <a class="hover:text-gray-500" href="https://github.com/tailscale-dev/tclip/blob/main/contrib/tclip.el">from the tclip repository</a>. You can install it by using <code>M-x package-install-file</code> or by opening it in Emacs and running <code>M-x package-install-from-buffer</code>. Please be sure that <code>request</code> is installed.</p>
+        If you do not want this behavior (such as if you are implementing support for your favorite text editor or
+        testing with <code>curl</code>), set the <code>Accept</code> header to the value <code>text/plain</code>.
+
+        This will make the server return the paste URL as normal text.
+    </p>
+
+    <p>Here is an example curl command you can use to paste data to the service:</p>
+
+    <pre><code>curl http://paste/api/post -F filename=filename.txt -F content="test paste from curl" -H "Accept: text/plain"</code></pre>
+
+    <h3 id="emacs">Emacs package</h3>
+
+    <p>
+        The default distribution of tclip ships with a package for
+        <a class="hover:text-gray-500" href="https://www.gnu.org/software/emacs/">GNU Emacs</a>.
+
+        This package will let you submit pastes from your editor. It requires the
+        <a class="hover:text-gray-500" href="https://github.com/tkf/emacs-request"><code>request</code></a> package
+        and exposes two interactive functions:
+    </p>
+
+    <ul class="dark:marker:text-gray-300 marker:text-gray-700">
+        <li><code>M-x tclip-submit-region</code> - submits the currently highlighted region to tclip</li>
+        <li><code>M-x tclip-submit-buffer</code> - submits the contents of the current buffer to tclip</li>
+    </ul>
+
+    <p>
+        You can download this package
+        <a class="hover:text-gray-500" href="https://github.com/tailscale-dev/tclip/blob/main/contrib/tclip.el">from the
+            tclip repository</a>.
+
+        You can install it by using <code>M-x package-install-file</code> or by opening it in Emacs and running
+        <code>M-x package-install-from-buffer</code>. Please be sure that <code>request</code> is installed.
+    </p>
 </div>
+
 {{template "footer" .}}

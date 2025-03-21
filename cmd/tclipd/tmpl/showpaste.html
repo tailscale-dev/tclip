@@ -1,43 +1,77 @@
 {{template "header" .}}
 
 <style>
-    code span.token.table {
-      display: inline;
-    }
+	code span.token.table {
+		display: inline;
+	}
 
-    .word-wrap-off {
-      white-space: pre !important;
-    }
-    .word-wrap-on {
-      white-space: pre-wrap !important;
-    }
+	.word-wrap-off {
+		white-space: pre !important;
+	}
+
+	.word-wrap-on {
+		white-space: pre-wrap !important;
+	}
 </style>
 
 <script src="/static/js/prism.js"></script>
 
 {{if .UserInfo}}
 {{if ne .PasterUserID .UserID}}
-<div class="float-right font-medium flex flex-row items-center"><span class="dark:text-gray-300">{{.PasterDisplayName}}</span> {{if ne .PasterProfilePicURL ""}}<img class="ml-3 w-8 rounded-xl" src="{{.PasterProfilePicURL}}" />{{end}}</div>
+<div class="float-right font-medium flex flex-row items-center">
+	<span class="dark:text-gray-300">{{.PasterDisplayName}}</span>
+
+	{{if ne .PasterProfilePicURL ""}}
+	<img class="ml-3 w-8 rounded-xl" src="{{.PasterProfilePicURL}}" />
+	{{end}}
+</div>
 {{end}}
 {{else if .DisplayUser}}
-<div class="float-right font-medium flex flex-row items-center"><span class="dark:text-gray-300">{{.PasterDisplayName}}</span> {{if ne .PasterProfilePicURL ""}}<img class="ml-3 w-8 rounded-xl" src="{{.PasterProfilePicURL}}" />{{end}}</div>
+<div class="float-right font-medium flex flex-row items-center">
+	<span class="dark:text-gray-300">{{.PasterDisplayName}}</span>
+
+	{{if ne .PasterProfilePicURL ""}}
+	<img class="ml-3 w-8 rounded-xl" src="{{.PasterProfilePicURL}}" />
+	{{end}}
+</div>
 {{end}}
 
 <p class="dark:text-gray-300">Created at {{.CreatedAt}}</p>
 
 {{if .RawHTML}}
-<article class="my-6 prose">
-{{.RawHTML}}
-</article>
+<article class="my-6 prose">{{.RawHTML}}</article>
 {{else}}
 <div style="display:inline-block;width:100%;">
-<pre class="{{.EnableLineNumbers}} {{.EnableWordWrap}}">
-<code class="my-6 max-w-full {{.CSSClass}}">{{.Data}}
-</code></pre>
+	<pre
+		class="{{.EnableLineNumbers}} {{.EnableWordWrap}}"><code class="my-6 max-w-full {{.CSSClass}}">{{.Data}}</code></pre>
 </div>
 <br />
 {{end}}
 
-<span class="text-gray-200"><a class="my-4 font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/paste/{{.ID}}">Permalink</a> - <a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/paste/{{.ID}}/dl">Download</a> - <a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/paste/{{.ID}}/raw">Raw</a>{{if .RawHTML}} - <a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/paste/{{.ID}}/md">Fancy</a>{{end}}{{if eq .UserID .PasterUserID}} - <a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500" href="/api/delete/{{.ID}}">Delete</a>{{end}}</span>
+<span class="text-gray-200">
+	<a class="my-4 font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+		href="/paste/{{.ID}}">Permalink</a>
+
+	<span>-</span>
+
+	<a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+		href="/paste/{{.ID}}/dl">Download</a>
+
+	<span>-</span>
+	<a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+		href="/paste/{{.ID}}/raw">Raw</a>
+
+	{{if .RawHTML}}
+	<span>-</span>
+	<a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+		href="/paste/{{.ID}}/md">Fancy</a>
+	{{end}}
+
+	{{if eq .UserID .PasterUserID}}
+	<span>-</span>
+	<a class="font-semibold underline text-gray-900 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+		href="/api/delete/{{.ID}}">Delete</a>
+	{{end}}
+</span>
 
 {{template "footer" .}}
