@@ -107,7 +107,7 @@
 }
 
 /*
-! tailwindcss v3.4.14 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -1433,17 +1433,17 @@ select {
 
 .border-gray-200 {
   --tw-border-opacity: 1;
-  border-color: rgba(238, 235, 234, var(--tw-border-opacity));
+  border-color: rgba(238, 235, 234, var(--tw-border-opacity, 1));
 }
 
 .bg-gray-100 {
   --tw-bg-opacity: 1;
-  background-color: rgba(247, 245, 244, var(--tw-bg-opacity));
+  background-color: rgba(247, 245, 244, var(--tw-bg-opacity, 1));
 }
 
 .bg-gray-600 {
   --tw-bg-opacity: 1;
-  background-color: rgba(68, 67, 66, var(--tw-bg-opacity));
+  background-color: rgba(68, 67, 66, var(--tw-bg-opacity, 1));
 }
 
 .p-4 {
@@ -1540,17 +1540,17 @@ select {
 
 .text-gray-200 {
   --tw-text-opacity: 1;
-  color: rgba(238, 235, 234, var(--tw-text-opacity));
+  color: rgba(238, 235, 234, var(--tw-text-opacity, 1));
 }
 
 .text-gray-900 {
   --tw-text-opacity: 1;
-  color: rgba(31, 30, 30, var(--tw-text-opacity));
+  color: rgba(31, 30, 30, var(--tw-text-opacity, 1));
 }
 
 .text-white {
   --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
 .underline {
@@ -1587,31 +1587,31 @@ select {
 }
 
 .marker\:text-gray-700 *::marker {
-  color: rgba(46, 45, 45, var(--tw-text-opacity));
+  color: rgba(46, 45, 45, var(--tw-text-opacity, 1));
 }
 
 .marker\:text-gray-700::marker {
-  color: rgba(46, 45, 45, var(--tw-text-opacity));
+  color: rgba(46, 45, 45, var(--tw-text-opacity, 1));
 }
 
 .placeholder\:text-gray-400::-moz-placeholder {
   --tw-text-opacity: 1;
-  color: rgba(175, 172, 171, var(--tw-text-opacity));
+  color: rgba(175, 172, 171, var(--tw-text-opacity, 1));
 }
 
 .placeholder\:text-gray-400::placeholder {
   --tw-text-opacity: 1;
-  color: rgba(175, 172, 171, var(--tw-text-opacity));
+  color: rgba(175, 172, 171, var(--tw-text-opacity, 1));
 }
 
 .hover\:bg-gray-500:hover {
   --tw-bg-opacity: 1;
-  background-color: rgba(112, 110, 109, var(--tw-bg-opacity));
+  background-color: rgba(112, 110, 109, var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-gray-500:hover {
   --tw-text-opacity: 1;
-  color: rgba(112, 110, 109, var(--tw-text-opacity));
+  color: rgba(112, 110, 109, var(--tw-text-opacity, 1));
 }
 
 .focus\:ring-2:focus {
@@ -1654,49 +1654,49 @@ select {
 @media (prefers-color-scheme: dark) {
   .dark\:border-gray-500 {
     --tw-border-opacity: 1;
-    border-color: rgba(112, 110, 109, var(--tw-border-opacity));
+    border-color: rgba(112, 110, 109, var(--tw-border-opacity, 1));
   }
 
   .dark\:border-gray-700 {
     --tw-border-opacity: 1;
-    border-color: rgba(46, 45, 45, var(--tw-border-opacity));
+    border-color: rgba(46, 45, 45, var(--tw-border-opacity, 1));
   }
 
   .dark\:bg-bg-app {
     --tw-bg-opacity: 1;
-    background-color: rgba(24, 23, 23, var(--tw-bg-opacity));
+    background-color: rgba(24, 23, 23, var(--tw-bg-opacity, 1));
   }
 
   .dark\:bg-gray-900 {
     --tw-bg-opacity: 1;
-    background-color: rgba(31, 30, 30, var(--tw-bg-opacity));
+    background-color: rgba(31, 30, 30, var(--tw-bg-opacity, 1));
   }
 
   .dark\:text-gray-200 {
     --tw-text-opacity: 1;
-    color: rgba(238, 235, 234, var(--tw-text-opacity));
+    color: rgba(238, 235, 234, var(--tw-text-opacity, 1));
   }
 
   .dark\:text-gray-300 {
     --tw-text-opacity: 1;
-    color: rgba(218, 214, 213, var(--tw-text-opacity));
+    color: rgba(218, 214, 213, var(--tw-text-opacity, 1));
   }
 
   .dark\:marker\:text-gray-300 *::marker {
-    color: rgba(218, 214, 213, var(--tw-text-opacity));
+    color: rgba(218, 214, 213, var(--tw-text-opacity, 1));
   }
 
   .dark\:marker\:text-gray-300::marker {
-    color: rgba(218, 214, 213, var(--tw-text-opacity));
+    color: rgba(218, 214, 213, var(--tw-text-opacity, 1));
   }
 
   .dark\:hover\:text-gray-100:hover {
     --tw-text-opacity: 1;
-    color: rgba(247, 245, 244, var(--tw-text-opacity));
+    color: rgba(247, 245, 244, var(--tw-text-opacity, 1));
   }
 
   .dark\:hover\:text-gray-300:hover {
     --tw-text-opacity: 1;
-    color: rgba(218, 214, 213, var(--tw-text-opacity));
+    color: rgba(218, 214, 213, var(--tw-text-opacity, 1));
   }
 }
