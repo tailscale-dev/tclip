@@ -1695,11 +1695,6 @@ select {
     color: rgba(247, 245, 244, var(--tw-text-opacity));
   }
 
-  .dark\:hover\:text-gray-200:hover {
-    --tw-text-opacity: 1;
-    color: rgba(238, 235, 234, var(--tw-text-opacity));
-  }
-
   .dark\:hover\:text-gray-300:hover {
     --tw-text-opacity: 1;
     color: rgba(218, 214, 213, var(--tw-text-opacity));
