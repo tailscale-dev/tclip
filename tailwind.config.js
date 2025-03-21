@@ -2,6 +2,7 @@ module.exports = {
     content: ["./cmd/tclipd/tmpl/*.html"],
     theme: {
       colors: {
+        "bg-app": "rgba(24, 23, 23)",
         blue: {
           0: "rgba(240, 245, 255)",
           50: "rgba(206, 222, 253)",
