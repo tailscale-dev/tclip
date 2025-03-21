@@ -1,10 +1,23 @@
 {{template "header" .}}
-<p class="my-4 max-w-lg">Oh noes! There was an error when trying to do this thing:</p>
 
-<code><pre class="p-4 bg-gray-100 text-gray-900">
-{{.Error}}
-</code></pre>
+<div class="dark:text-gray-300 flex flex-col gap-2">
+    <p>There was an error while trying to resolve your request.</p>
 
-<p class="my-4 max-w-lg">This is almost certainly not what was anticipated, and if you think you are seeing this in error, please contact your administrator or Tailscale support for help with the program itself.</p>
+    <p>
+        If you think you are seeing this in error, please contact your administrator or Tailscale support for help with
+        the program itself.
+    </p>
+</div>
+
+<div class="pt-3">
+    <h2 class="text-xl font-bold dark:text-gray-200 pb-2">Relevant logs:</h2>
+
+    <code>
+        <pre class="p-4 bg-gray-100 text-gray-900 dark:bg-bg-app dark:text-gray-300">
+            {{.Error}}
+        </pre>
+    </code>
+</div>
+
 </div>
 {{template "footer" .}}

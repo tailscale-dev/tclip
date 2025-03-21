@@ -1,42 +1,45 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>{{.Title}}</title>
-        <link rel="stylesheet" href="/static/css/font-files/inter.css" />
-        <link rel="stylesheet" href="/static/css/normalize.css" />
-        <link rel="stylesheet" href="/static/css/prism.css" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <style>
-            html {
-                background: #fff;
-                color: #333;
-                font: 16px/1.4 OpenDyslexic, Inter, Helvetica, Arial, sans-serif;
-            }
 
+<head>
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/font-files/inter.css" />
+    <link rel="stylesheet" href="/static/css/normalize.css" />
+    <link rel="stylesheet" href="/static/css/prism.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html {
+            background: #fff;
+            color: #333;
+            font: 16px/1.4 OpenDyslexic, Inter, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            max-width: 720px;
+            padding: 20px 40px;
+            margin: 0 auto;
+        }
+
+        @media screen and (max-width: 540px) {
             body {
-                max-width: 720px;
-                padding: 20px 40px;
-                margin: 0 auto;
+                padding: 20px;
+                font-size: 0.875em;
             }
+        }
 
-            @media screen and (max-width: 540px) {
-                body {
-                    padding: 20px;
-                    font-size: 0.875em;
-                }
-            }
+        img {
+            max-width: 100%;
+        }
+    </style>
+</head>
 
-			img {
-			  max-width: 100%;
-			}
-        </style>
-    </head>
-    <body id="top">
-        <script src="/static/js/prism.js"></script>
-        <main>
-            <article>
-                {{.RawHTML}}
-            </article>
-        </main>
-    </body>
+<body id="top">
+    <script src="/static/js/prism.js"></script>
+    <main>
+        <article>
+            {{.RawHTML}}
+        </article>
+    </main>
+</body>
+
 </html>
