@@ -41,7 +41,7 @@
 {{if .RawHTML}}
 <article class="my-6 prose">{{.RawHTML}}</article>
 {{else}}
-<div style="display:inline-block;width:100%;">
+<div class="inline-block w-full">
 	<pre
 		class="{{.EnableLineNumbers}} {{.EnableWordWrap}}"><code class="my-6 max-w-full {{.CSSClass}}">{{.Data}}</code></pre>
 </div>

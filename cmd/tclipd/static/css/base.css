@@ -1355,6 +1355,10 @@ select {
   display: contents;
 }
 
+.h-8 {
+  height: 2rem;
+}
+
 .min-h-screen {
   min-height: 100vh;
 }
