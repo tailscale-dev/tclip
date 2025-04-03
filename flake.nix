@@ -21,16 +21,16 @@
       pkgs = import nixpkgs {inherit system;};
     in {
       packages = rec {
-        tclipd = pkgs.buildGo123Module {
+        tclipd = pkgs.buildGo124Module {
           pname = "tclipd";
           version = "0.1.0-${version}";
           inherit (pkgs) go;
           src = ./.;
           subPackages = "cmd/tclipd";
-          vendorHash = "sha256-nVJWNeN7Ta8nPAmiJL+mO887vxxzfwDO+wjkwRRlidc=";
+          vendorHash = "sha256-jxrmVIJ8FL+lm52bp/hXJZCX+o37BxXf6ZelehuX6MU=";
         };
 
-        tclip = pkgs.buildGo123Module {
+        tclip = pkgs.buildGo124Module {
           pname = "tclip";
           inherit (tclipd) src version vendorHash;
           subPackages = "cmd/tclip";
@@ -73,10 +73,10 @@
           gotools
           go-tools
           sqlite-interactive
-
           yarn
           nodejs
-          (pkgs.buildGo123Module rec {
+
+          (pkgs.buildGo124Module rec {
             name = "mkctr";
             src = pkgs.fetchFromGitHub {
               owner = "tailscale";
