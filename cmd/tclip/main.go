@@ -84,4 +84,5 @@ func main() {
 	}
 
 	io.Copy(os.Stdout, resp.Body)
+	fmt.Printf("\n")
 }
