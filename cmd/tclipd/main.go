@@ -737,12 +737,13 @@ func main() {
 	ctx := context.Background()
 	tclipURL, ok := lc.ExpandSNIName(ctx, *hostname)
 	if !ok {
+		log.Println("warning: HTTPS is unavailable, please check that it is enabled in the admin panel and that the hostname is configured correctly. Proceeding with only HTTP.")
+		*disableHTTPS = true
+	}
+
+	// if the user disabled HTTPS or HTTPS is unavailable
 		if *disableHTTPS {
 			tclipURL = *hostname
-		} else {
-			log.Println(tclipURL)
-			log.Fatal("HTTPS is not enabled in the admin panel")
-		}
 	}
 
 	ln, err := s.Listen("tcp", ":80")
