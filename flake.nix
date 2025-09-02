@@ -27,7 +27,7 @@
           inherit (pkgs) go;
           src = ./.;
           subPackages = "cmd/tclipd";
-          vendorHash = "sha256-b1U3E673LzFam5Dk35VCB3uRnu/h2kquW/fsVKpyFxQ=";
+          vendorHash = "sha256-5ikMQoi2A6qtQ4CjuLt7Is/lygItRARwOeTscohpO2E=";
         };
 
         tclip = pkgs.buildGo124Module {
@@ -68,7 +68,7 @@
 
       devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
-          go_1_23
+          go_1_24
           gopls
           gotools
           go-tools
