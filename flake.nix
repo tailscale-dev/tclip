@@ -21,27 +21,25 @@
       pkgs = import nixpkgs {inherit system;};
     in {
       packages = rec {
-        tclipd = pkgs.buildGo124Module {
+        tclipd = pkgs.buildGo125Module {
           pname = "tclipd";
           version = "0.1.0-${version}";
           inherit (pkgs) go;
           src = ./.;
           subPackages = "cmd/tclipd";
-          vendorHash = "sha256-4QWTlzsGoKDA02+IC6fTX/zQOG84Wb5l3+xWsVgNY2k=";
+          vendorHash = "sha256-HY9yvmkQnk7GSlP42vgQmhm7rTxB4XE7r9MBvgr3AVI=";
         };
 
-        tclip = pkgs.buildGo124Module {
+        tclip = pkgs.buildGo125Module {
           pname = "tclip";
           inherit (tclipd) src version vendorHash;
           subPackages = "cmd/tclip";
           inherit (pkgs) go;
-          CGO_ENABLED = "0";
+          env.CGO_ENABLED = "0";
         };
 
         portable-service = let
-          web-service = pkgs.substituteAll {
-            name = "tclip.service";
-            src = ./run/portable-service/tclip.service.in;
+          web-service = pkgs.replaceVars ./run/portable-service/tclip.service.in {
             inherit tclipd;
           };
         in
@@ -68,7 +66,7 @@
 
       devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
-          go_1_23
+          go_1_25
           gopls
           gotools
           go-tools
@@ -76,16 +74,16 @@
           yarn
           nodejs
 
-          (pkgs.buildGo124Module rec {
+          (pkgs.buildGo125Module rec {
             name = "mkctr";
             src = pkgs.fetchFromGitHub {
               owner = "tailscale";
               repo = "mkctr";
-              rev = "42e5cb39d30bc804bd9a0071095cbd5de78e54f8";
-              sha256 = "sha256-MN47+aiJXqzAir3hhCKgY7OAys/ZLFi3OKkwH/wgFco=";
+              rev = "ea857e3e500ba9eba656ade7b351fbf8cb4b7587";
+              sha256 = "sha256-j1Ru+5PZGnZa70ussNUcJNfmKDpBXvMuHg4iTjsLCwk=";
             };
 
-            vendorHash = "sha256-nIoe79dZwrFqrYLVfqASQDDjG1x0GmZpxDpnEdfny8k=";
+            vendorHash = "sha256-RTw80aWylnl3d9IbUFdewFoW7OheecFwGBsPBeWROkE=";
           })
         ];
 
