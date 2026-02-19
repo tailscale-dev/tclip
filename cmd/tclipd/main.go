@@ -56,7 +56,27 @@ var (
 	templateFiles embed.FS
 )
 
+type capabilities struct {
+	All  allCapabilities  `json:"admin"`
+	User userCapabilities `json:"user"`
+}
+
+type allCapabilities struct {
+	Admin  bool `json:"admin"`  // grant every permission
+	List   bool `json:"list"`   // list other users pastes
+	Read   bool `json:"read"`   // read other users pastes
+	Delete bool `json:"delete"` // delete other peoples pastes
+}
+
+type userCapabilities struct {
+	Write bool `json:"write"` // create new pastes and edit your own
+	Read  bool `json:"read"`  // read own pastes
+	List  bool `json:"list"`  // list own pastes
+}
+
 const timeFormat = "2006-01-02 15:04"
+
+const capName = "tailscale.com/cap/tclip"
 
 func hasEnv(name string) bool {
 	_, ok := os.LookupEnv(name)
@@ -96,7 +116,7 @@ func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	ui, _, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
 		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
@@ -154,7 +174,7 @@ LIMIT 5
 }
 
 func (s *Server) TailnetHelp(w http.ResponseWriter, r *http.Request) {
-	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	ui, _, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
 		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
@@ -198,7 +218,7 @@ func (s *Server) PublicIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
-	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	userInfo, _, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -291,7 +311,7 @@ type JoinedPasteInfo struct {
 }
 
 func (s *Server) TailnetPasteIndex(w http.ResponseWriter, r *http.Request) {
-	userInfo, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	userInfo, _, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
 		s.ShowError(w, r, err, http.StatusInternalServerError)
 		return
@@ -419,7 +439,7 @@ func clampToZero(i int) int {
 }
 
 func (s *Server) TailnetDeletePost(w http.ResponseWriter, r *http.Request) {
-	ui, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	ui, _, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
 		s.ShowError(w, r, err, http.StatusBadRequest)
 		return
@@ -473,7 +493,7 @@ WHERE id = ?1 AND user_id = ?2
 }
 
 func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
-	ui, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	ui, _, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	var up *tailcfg.UserProfile
 	if ui != nil {
 		up = ui.UserProfile
@@ -667,7 +687,7 @@ WHERE p.id = ?1`
 		RawHTML             *template.HTML
 		CSSClass            string
 		EnableLineNumbers   string
-		EnableWordWrap		string
+		EnableWordWrap      string
 	}{
 		UserInfo:            up,
 		Title:               fname,
@@ -682,7 +702,7 @@ WHERE p.id = ?1`
 		RawHTML:             rawHTML,
 		CSSClass:            cssClass,
 		EnableLineNumbers:   lineNumbersClass,
-		EnableWordWrap:		 wordWrapClass,
+		EnableWordWrap:      wordWrapClass,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
@@ -884,10 +904,10 @@ func md5Hash(inp string) string {
 	return fmt.Sprintf("%x", h.Sum([]byte(inp)))
 }
 
-func upsertUserInfo(ctx context.Context, db *sql.DB, lc *tailscale.LocalClient, remoteAddr string) (*apitype.WhoIsResponse, error) {
+func upsertUserInfo(ctx context.Context, db *sql.DB, lc *tailscale.LocalClient, remoteAddr string) (*apitype.WhoIsResponse, *capabilities, error) {
 	userInfo, err := lc.WhoIs(ctx, remoteAddr)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if userInfo.UserProfile.LoginName == "tagged-devices" {
@@ -895,6 +915,58 @@ func upsertUserInfo(ctx context.Context, db *sql.DB, lc *tailscale.LocalClient, 
 		userInfo.UserProfile.LoginName = userInfo.Node.Hostinfo.Hostname()
 		userInfo.UserProfile.DisplayName = fmt.Sprintf("tagged node %s: %s", userInfo.Node.Hostinfo.Hostname(), userInfo.Node.Tags[0])
 		userInfo.UserProfile.ProfilePicURL = fmt.Sprintf("https://www.gravatar.com/avatar/%s", md5Hash(userInfo.Node.ComputedNameWithHost))
+	}
+
+	// get caps
+	caps, _ := tailcfg.UnmarshalCapJSON[capabilities](userInfo.CapMap, capName)
+
+	var ret capabilities
+
+	for _, cap := range caps {
+		// all permissions
+		if cap.All.Admin {
+			ret.All.Admin = true
+			ret.All.Delete = true
+			ret.All.List = true
+			ret.All.Read = true
+
+			// Admins get all their user perms
+			ret.User.Write = true
+			ret.User.Read = true
+			ret.User.List = true
+			break
+		}
+
+		if cap.All.List {
+			ret.All.List = true
+			ret.All.Read = true
+			ret.User.List = true
+			ret.User.Read = true
+		}
+
+		if cap.All.Read {
+			ret.All.Read = true
+			ret.User.Read = true
+		}
+
+		if cap.All.Delete {
+			ret.All.Delete = true
+			ret.User.Read = true
+		}
+
+		if cap.User.Write {
+			ret.User.Write = true
+			ret.User.Read = true
+		}
+
+		if cap.User.List {
+			ret.User.List = true
+			ret.User.Read = true
+		}
+
+		if cap.User.Read {
+			ret.User.Read = true
+		}
 	}
 
 	q := `
@@ -926,8 +998,8 @@ ON CONFLICT DO
 		userInfo.UserProfile.ProfilePicURL,
 	)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return userInfo, nil
+	return userInfo, &ret, nil
 }
