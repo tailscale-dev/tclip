@@ -493,7 +493,7 @@ WHERE id = ?1 AND user_id = ?2
 }
 
 func (s *Server) ShowPost(w http.ResponseWriter, r *http.Request) {
-	ui, _, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
+	ui, cap, _ := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	var up *tailcfg.UserProfile
 	if ui != nil {
 		up = ui.UserProfile
@@ -542,7 +542,18 @@ WHERE p.id = ?1`
 
 	err := row.Scan(&fname, &createdAt, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
 	if err != nil {
-		s.ShowError(w, r, fmt.Errorf("can't find paste %s: %w", id, err), http.StatusInternalServerError)
+		if cap.CanReadAll() {
+			// TODO(erisa): split 500 and 404 errors
+			s.ShowError(w, r, fmt.Errorf("can't find paste %s: %w", id, err), http.StatusNotFound)
+		} else {
+			// TODO(erisa): consider grants example html here
+			s.ShowError(w, r, fmt.Errorf("cannot access paste %s: %w", id, err), http.StatusUnauthorized)
+		}
+		return
+	}
+
+	if !cap.CanRead(ui, userID) {
+		s.ShowError(w, r, fmt.Errorf("cannot access paste %s: %w", id, err), http.StatusUnauthorized)
 		return
 	}
 
