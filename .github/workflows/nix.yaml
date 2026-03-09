@@ -11,8 +11,8 @@ jobs:
       contents: read
       packages: write
     steps:
-    - uses: actions/checkout@v4
-    - uses: cachix/install-nix-action@v30
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+    - uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - name: "Basic CLI and web build"
@@ -37,7 +37,7 @@ jobs:
         nix build .#portable-service
         mkdir -p var
         cp ./result/*.raw ./var
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:
         name: portable-service
         path: ./var/*.raw
