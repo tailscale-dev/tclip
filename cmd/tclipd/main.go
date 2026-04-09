@@ -57,7 +57,7 @@ var (
 )
 
 type capabilities struct {
-	All  allCapabilities  `json:"admin"`
+	All  allCapabilities  `json:"all"`
 	User userCapabilities `json:"user"`
 }
 
@@ -74,9 +74,20 @@ type userCapabilities struct {
 	List  bool `json:"list"`  // list own pastes
 }
 
+func (cap capabilities) CanReadAll() bool {
+	return cap.All.Read
+}
+
+func (cap capabilities) CanRead(ui *apitype.WhoIsResponse, userID tailcfg.UserID) bool {
+	if ui.UserProfile.ID == userID && cap.User.Read {
+		return true
+	}
+	return false
+}
+
 const timeFormat = "2006-01-02 15:04"
 
-const capName = "tailscale.com/cap/tclip"
+const capName = "erisa.uk/cap/tclip"
 
 func hasEnv(name string) bool {
 	_, ok := os.LookupEnv(name)
@@ -537,7 +548,7 @@ WHERE p.id = ?1`
 
 	row := s.db.QueryRowContext(r.Context(), q, id)
 	var fname, data, userLoginName, userDisplayName, userProfilePicURL, lineNumbersClass, wordWrapClass string
-	var userID int64
+	var userID tailcfg.UserID
 	var createdAt string
 
 	err := row.Scan(&fname, &createdAt, &data, &userID, &userLoginName, &userDisplayName, &userProfilePicURL)
@@ -690,7 +701,7 @@ WHERE p.id = ?1`
 		CreatedAt           string
 		PasterDisplayName   string
 		PasterProfilePicURL string
-		PasterUserID        int64
+		PasterUserID        tailcfg.UserID
 		DisplayUser         bool
 		UserID              int64
 		ID                  string
