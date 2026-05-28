@@ -21,16 +21,16 @@
       pkgs = import nixpkgs {inherit system;};
     in {
       packages = rec {
-        tclipd = pkgs.buildGo125Module {
+        tclipd = pkgs.buildGo126Module {
           pname = "tclipd";
           version = "0.1.0-${version}";
           inherit (pkgs) go;
           src = ./.;
           subPackages = "cmd/tclipd";
-          vendorHash = "sha256-NaytxOvg4q2vaURAbnI0wn4mT5U+J5hFWcyp00IdLeQ=";
+          vendorHash = "sha256-Hs73RJHMcnrjq19l8bmRvs9urxGqOG582xch+IhLtss=";
         };
 
-        tclip = pkgs.buildGo125Module {
+        tclip = pkgs.buildGo126Module {
           pname = "tclip";
           inherit (tclipd) src version vendorHash;
           subPackages = "cmd/tclip";
@@ -66,7 +66,7 @@
 
       devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
-          go_1_25
+          go_1_26
           gopls
           gotools
           go-tools
@@ -74,7 +74,7 @@
           yarn
           nodejs
 
-          (pkgs.buildGo125Module rec {
+          (pkgs.buildGo126Module rec {
             name = "mkctr";
             src = pkgs.fetchFromGitHub {
               owner = "tailscale";
