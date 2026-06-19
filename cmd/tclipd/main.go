@@ -27,7 +27,6 @@ import (
 	"github.com/niklasfasching/go-org/org"
 	"github.com/russross/blackfriday"
 	_ "modernc.org/sqlite"
-	"tailscale.com/client/tailscale"
 	"tailscale.com/client/tailscale/apitype"
 	"tailscale.com/ipn"
 	"tailscale.com/tailcfg"
@@ -87,7 +86,7 @@ func (cap capabilities) CanRead(ui *apitype.WhoIsResponse, userID tailcfg.UserID
 
 const timeFormat = "2006-01-02 15:04"
 
-const capName = "erisa.uk/cap/tclip"
+const capName = "tailscale.com/cap/tclip"
 
 func hasEnv(name string) bool {
 	_, ok := os.LookupEnv(name)
@@ -114,11 +113,22 @@ func envOr(key, defaultVal string) string {
 	return defaultVal
 }
 
+type LocalClient interface {
+	WhoIs(ctx context.Context, remoteAddr string) (*apitype.WhoIsResponse, error)
+}
+
 type Server struct {
-	lc       *tailscale.LocalClient // localclient to tsnet server
-	db       *sql.DB                // SQLite datastore
-	tmpls    *template.Template     // HTML templates
-	tclipURL string                 // the tailnet/public base URL of this service
+	lc       LocalClient        // localclient to tsnet server
+	db       *sql.DB            // SQLite datastore
+	tmpls    *template.Template // HTML templates
+	tclipURL string             // the tailnet/public base URL of this service
+}
+
+func (s *Server) Close() error {
+	if err := s.db.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Server) TailnetIndex(w http.ResponseWriter, r *http.Request) {
@@ -228,6 +238,35 @@ func (s *Server) PublicIndex(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) CreatePaste(ctx context.Context, id string, created time.Time, userID tailcfg.UserID, fname, data string) error {
+	q := `
+INSERT INTO pastes
+    ( id
+    , created_at
+    , user_id
+    , filename
+    , data
+    )
+VALUES
+    ( ?1
+    , ?2
+    , ?3
+    , ?4
+    , ?5
+    )`
+
+	_, err := s.db.ExecContext(
+		ctx,
+		q,
+		id,
+		created.Format(timeFormat),
+		userID,
+		fname,
+		data,
+	)
+	return err
+}
+
 func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
 	userInfo, _, err := upsertUserInfo(r.Context(), s.db, s.lc, r.RemoteAddr)
 	if err != nil {
@@ -266,27 +305,10 @@ func (s *Server) TailnetSubmitPaste(w http.ResponseWriter, r *http.Request) {
 		fname = "untitled"
 	}
 
-	q := `
-INSERT INTO pastes
-    ( id
-    , created_at
-    , user_id
-    , filename
-    , data
-    )
-VALUES
-    ( ?1
-    , ?2
-    , ?3
-    , ?4
-    , ?5
-    )`
-
-	_, err = s.db.ExecContext(
+	err = s.CreatePaste(
 		r.Context(),
-		q,
 		id,
-		time.Now().Format(timeFormat),
+		time.Now(),
 		userInfo.UserProfile.ID,
 		fname,
 		data,
@@ -558,6 +580,7 @@ WHERE p.id = ?1`
 			s.ShowError(w, r, fmt.Errorf("can't find paste %s: %w", id, err), http.StatusNotFound)
 		} else {
 			// TODO(erisa): consider grants example html here
+			// TODO(erisa): create new template for 401 that doesnt leak error data
 			s.ShowError(w, r, fmt.Errorf("cannot access paste %s: %w", id, err), http.StatusUnauthorized)
 		}
 		return
@@ -731,6 +754,12 @@ WHERE p.id = ?1`
 	}
 }
 
+func NewServer(lc LocalClient, db *sql.DB, tclipURL string) *Server {
+	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.html"))
+	srv := &Server{lc, db, tmpls, tclipURL}
+	return srv
+}
+
 func main() {
 	flag.Parse()
 
@@ -751,12 +780,6 @@ func main() {
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
 	}
-
-	db, err := openDB(*dataDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
 	lc, err := s.LocalClient()
 	if err != nil {
@@ -784,8 +807,8 @@ func main() {
 	}
 
 	// if the user disabled HTTPS or HTTPS is unavailable
-		if *disableHTTPS {
-			tclipURL = *hostname
+	if *disableHTTPS {
+		tclipURL = *hostname
 	}
 
 	ln, err := s.Listen("tcp", ":80")
@@ -793,9 +816,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tmpls := template.Must(template.ParseFS(templateFiles, "tmpl/*.html"))
+	db, err := openDB(*dataDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
-	srv := &Server{lc, db, tmpls, tclipURL}
+	srv := NewServer(lc, db, tclipURL)
 
 	tailnetMux := http.NewServeMux()
 	tailnetMux.Handle("/static/", http.FileServer(http.FS(staticFiles)))
@@ -927,12 +954,13 @@ func md5Hash(inp string) string {
 	return fmt.Sprintf("%x", h.Sum([]byte(inp)))
 }
 
-func upsertUserInfo(ctx context.Context, db *sql.DB, lc *tailscale.LocalClient, remoteAddr string) (*apitype.WhoIsResponse, *capabilities, error) {
+func upsertUserInfo(ctx context.Context, db *sql.DB, lc LocalClient, remoteAddr string) (*apitype.WhoIsResponse, *capabilities, error) {
 	userInfo, err := lc.WhoIs(ctx, remoteAddr)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	fmt.Printf("userinf: %v\n", userInfo)
 	if userInfo.UserProfile.LoginName == "tagged-devices" {
 		userInfo.UserProfile.ID = tailcfg.UserID(userInfo.Node.ID)
 		userInfo.UserProfile.LoginName = userInfo.Node.Hostinfo.Hostname()
