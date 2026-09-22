@@ -74,6 +74,14 @@ will destroy the node when the service shuts down.
 
 Your authkey should start with `tskey-auth`.
 
+The authkey is read from the `TS_AUTHKEY` environment variable. If its value
+begins with `file:`, the rest is treated as the path of a file containing the
+key, as in `TS_AUTHKEY=file:/run/secrets/tclip_authkey`. tclip exits with an
+error if the file is missing or empty.
+
+The key is only needed to register the node. Once registered, the node's
+identity lives in the data directory, so the key can be removed.
+
 You will need to have Magic DNS enabled.
 
 ### fly.io
@@ -143,6 +151,32 @@ docker rm -f tclip
 ```
 
 Then run the above command to recreate the container.
+
+#### Docker Compose
+
+To keep the authkey out of the environment, pass it as a secret and point
+`TS_AUTHKEY` at the file Compose mounts it to:
+
+```yaml
+services:
+  tclip:
+    image: ghcr.io/tailscale-dev/tclip:latest
+    environment:
+      DATA_DIR: /data
+      TS_AUTHKEY: file:/run/secrets/tclip_authkey
+    volumes:
+      - tclip-data:/data
+    secrets:
+      - tclip_authkey
+    restart: always
+
+volumes:
+  tclip-data:
+
+secrets:
+  tclip_authkey:
+    file: ./tclip.authkey
+```
 
 #### Backups
 

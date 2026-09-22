@@ -83,6 +83,42 @@ func envOr(key, defaultVal string) string {
 	return defaultVal
 }
 
+// authKeyPrefix marks a TS_AUTHKEY value as a path to read the key from
+// rather than the key itself. This matches the convention used by the
+// Tailscale container images.
+const authKeyPrefix = "file:"
+
+// authKeyFromEnv returns the Tailscale auth key configured in the
+// environment, reading TS_AUTHKEY.
+//
+// If the value begins with "file:", the remainder is the path to a file
+// holding the key, and that file's contents are returned instead.
+//
+// An empty return value means no key was configured, in which case tsnet
+// prints a login URL instead.
+func authKeyFromEnv() (string, error) {
+	key := os.Getenv("TS_AUTHKEY")
+
+	path, ok := strings.CutPrefix(key, authKeyPrefix)
+	if !ok {
+		return key, nil
+	}
+	if path == "" {
+		return "", fmt.Errorf("auth key %q names no file", authKeyPrefix)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("reading auth key file: %w", err)
+	}
+	// Trim whitespace from the file contents
+	key = strings.TrimSpace(string(data))
+	if key == "" {
+		return "", fmt.Errorf("auth key file %q is empty", path)
+	}
+	return key, nil
+}
+
 type Server struct {
 	lc       *tailscale.LocalClient // localclient to tsnet server
 	db       *sql.DB                // SQLite datastore
@@ -667,7 +703,7 @@ WHERE p.id = ?1`
 		RawHTML             *template.HTML
 		CSSClass            string
 		EnableLineNumbers   string
-		EnableWordWrap		string
+		EnableWordWrap      string
 	}{
 		UserInfo:            up,
 		Title:               fname,
@@ -682,7 +718,7 @@ WHERE p.id = ?1`
 		RawHTML:             rawHTML,
 		CSSClass:            cssClass,
 		EnableLineNumbers:   lineNumbersClass,
-		EnableWordWrap:		 wordWrapClass,
+		EnableWordWrap:      wordWrapClass,
 	})
 	if err != nil {
 		log.Printf("%s: %v", r.RemoteAddr, err)
@@ -695,11 +731,17 @@ func main() {
 	os.MkdirAll(*dataDir, 0700)
 	os.MkdirAll(filepath.Join(*dataDir, "tsnet"), 0700)
 
+	authKey, err := authKeyFromEnv()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	s := &tsnet.Server{
 		Hostname:   *hostname,
 		Dir:        filepath.Join(*dataDir, "tsnet"),
 		Logf:       func(string, ...any) {},
 		ControlURL: *controlUrl,
+		AuthKey:    authKey,
 	}
 
 	if *tsnetLogVerbose {
@@ -742,8 +784,8 @@ func main() {
 	}
 
 	// if the user disabled HTTPS or HTTPS is unavailable
-		if *disableHTTPS {
-			tclipURL = *hostname
+	if *disableHTTPS {
+		tclipURL = *hostname
 	}
 
 	ln, err := s.Listen("tcp", ":80")
