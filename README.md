@@ -127,7 +127,7 @@ docker run \
   -v /var/lib/tclip:/data \
   -e DATA_DIR=/data \
   -e TS_AUTHKEY=<key> \
-  -n tclip \
+  --name tclip \
   --restart always \
   ghcr.io/tailscale-dev/tclip:latest
 ```
